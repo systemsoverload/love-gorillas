@@ -1,7 +1,10 @@
+HC = require "HardonCollider"
+
 function love.load()
-	gorilla1 = {}
+	Collider = HC(100, on_collide )
 	gorilla2 = {}
 	buildings = {}
+
 	for i=0,9 do
 		building = {};
 		building.red = math.random( 255 )
@@ -16,8 +19,8 @@ function love.load()
 	gorilla1Building = buildings[math.random(7)]
 	gorilla2Building = buildings[math.random(7)]
 
-	gorilla1.x = gorilla1Building.x + 15
-	gorilla1.y = gorilla1Building.y - 30
+	gorilla1 = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	gorilla1.image = love.graphics.newImage('/images/gorilla_stand.png')
 
 	gorilla2.x = gorilla2Building.x + 15
 	gorilla2.y = gorilla2Building.y - 30
@@ -41,10 +44,10 @@ function love.draw()
 		love.graphics.rectangle("fill", v.x, v.y, v.width, v.height);
 	end
 
-	--Draw gorilla1
-	love.graphics.setColor(255,255,255,255)
-	love.graphics.draw(gorillaImage, gorilla1.x, gorilla1.y)
-
+	-- --Draw gorilla1
+	-- love.graphics.setColor(255,255,255,255)
+	-- love.graphics.draw(gorillaImage, gorilla1.x, gorilla1.y)
+	gorilla1:draw('fill')
 	--Draw gorilla1
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(gorillaImage, gorilla2.x, gorilla2.y)
@@ -52,4 +55,8 @@ function love.draw()
 	--Draw the sun!
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(sunImage, 400, 25)
+end
+
+function on_collide( dt, shape_a, shape_b )
+
 end
