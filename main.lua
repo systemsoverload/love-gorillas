@@ -111,7 +111,7 @@ end
 function fireBanana(thrownBy)
 	local gx, gy = thrownBy:center()
 	banana = Collider:addRectangle(gx, gy, 10, 10)
-	banana.velocity = { x = 100, y = -45}
+	banana.velocity = { x = 100, y = math.random(-100, 0) }
 	banana.thrownBy = thrownBy
 	banana.typeOf = 'banana'
 end
