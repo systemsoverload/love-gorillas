@@ -15,7 +15,7 @@ function love.load()
 		building.blue = math.random( 255 )
 		building.width = 80
 		-- NOTE - Temp make all buildings same height for testing
-		building.height = 100--math.random(250)
+		building.height = math.random(250)
 		building.x = 80 * i
 		building.y = 600 - building.height
 		table.insert(buildings, building)
@@ -31,6 +31,7 @@ function love.load()
 
 	sunImage = love.graphics.newImage("/images/sun.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
+	bananaImage = love.graphics.newImage("/images/banana_f1.png")
 
 end
 
@@ -55,7 +56,9 @@ function love.draw()
 
 	--Draw bananas
 	if banana then
-		banana:draw('fill')
+		local bx, by = banana:center()
+		love.graphics.setColor(255,255,255,255)
+		love.graphics.draw(bananaImage, bx, by)
 	end
 
 	--Draw the gorillas
