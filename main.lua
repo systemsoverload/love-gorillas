@@ -1,4 +1,5 @@
 HC = require "HardonCollider"
+anim8 = require "anim8/anim8"
 
 local text = {}
 
@@ -31,8 +32,10 @@ function love.load()
 
 	sunImage = love.graphics.newImage("/images/sun.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
-	bananaImage = love.graphics.newImage("/images/banana_f1.png")
 
+	bananaImage = love.graphics.newImage("/images/banana.png")
+	bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
+	Bananimation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
 end
 
 function love.update(dt)
@@ -40,6 +43,7 @@ function love.update(dt)
 		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 	end
 
+	Bananimation:update(dt)
 	Collider:update(dt)
 end
 
@@ -58,7 +62,7 @@ function love.draw()
 	if banana then
 		local bx, by = banana:center()
 		love.graphics.setColor(255,255,255,255)
-		love.graphics.draw(bananaImage, bx, by)
+		Bananimation:draw(bananaImage, bx, by)
 	end
 
 	--Draw the gorillas
