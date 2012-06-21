@@ -10,15 +10,17 @@ function love.load()
 
 	--Generate random buildings
 	for i=0,9 do
-		building = {}
+		local height =  100--math.random(250)
+		local buildingX = i * 80
+		local buildingY = 600 - height
+		building = Collider:addRectangle( buildingX, buildingY, height, 80)
 		building.red = math.random( 255 )
 		building.green = math.random( 255 )
 		building.blue = math.random( 255 )
-		building.width = 80
+		building.x = buildingX
+		building.y = buildingY
 		-- NOTE - Temp make all buildings same height for testing
-		building.height = math.random(250)
-		building.x = 80 * i
-		building.y = 600 - building.height
+		building.typeOf = 'building'
 		table.insert(buildings, building)
 	end
 
@@ -28,7 +30,9 @@ function love.load()
 	gorilla2Building = buildings[math.random(5) + 5]
 
 	gorilla1 = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	gorilla1.typeOf = 'gorilla'
 	gorilla2 = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
+	gorilla2.typeOf = 'gorilla'
 
 	sunImage = love.graphics.newImage("/images/sun.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
@@ -43,6 +47,10 @@ function love.update(dt)
 		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 	end
 
+	while #text > 40 do
+	    table.remove(text, 1)
+	end
+
 	Bananimation:update(dt)
 	Collider:update(dt)
 end
@@ -55,7 +63,7 @@ function love.draw()
 	--Draw random buildings
 	for i,v in ipairs(buildings) do
 		love.graphics.setColor(v.red,v.green,v.blue,255);
-		love.graphics.rectangle("fill", v.x, v.y, v.width, v.height)
+		v:draw('fill')
 	end
 
 	--Draw bananas
@@ -87,7 +95,7 @@ function love.keyreleased(key)
 		fireBanana(gorilla1)
 	end
 	if key == "escape" then
-		love.event.push("quit")   -- actually causes the app to quit
+		love.event.push("quit")
 	end
 end
 
@@ -96,10 +104,20 @@ function fireBanana(thrownBy)
 	banana = Collider:addRectangle(gx, gy, 10, 10)
 	banana.velocity = { x = 100, y = 0}
 	banana.thrownBy = thrownBy
+	banana.typeOf = 'banana'
 end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
-	if shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
-		text[#text+1] = string.format("Colliding - (%s,%s)", mtv_x, mtv_y)
+	--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
+	if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
+		text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
+		shape_b.velocity = { x = 0, y = 0}
+		banana = nil
+		Bananimation:pause()
+	end
+
+	--Collision check for building
+	if shape_a.typeOf == 'building' then
+		text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 	end
 end
