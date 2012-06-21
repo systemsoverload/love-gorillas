@@ -11,7 +11,7 @@ function love.load()
 	--Generate random buildings
 	for i=0,9 do
 		-- NOTE - Temp make all buildings same height for testing
-		local height =  math.random(250)
+		local height =  math.random(40, 250)
 		local buildingX = i * 80
 		local buildingY = 600 - height
 		building = Collider:addRectangle( buildingX, buildingY, 80, height)
