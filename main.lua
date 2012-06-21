@@ -11,10 +11,10 @@ function love.load()
 	--Generate random buildings
 	for i=0,9 do
 		-- NOTE - Temp make all buildings same height for testing
-		local height =  100 --math.random(250)
+		local height =  math.random(250)
 		local buildingX = i * 80
 		local buildingY = 600 - height
-		building = Collider:addRectangle( buildingX, buildingY, height, 80)
+		building = Collider:addRectangle( buildingX, buildingY, 80, height)
 		building.red = math.random( 255 )
 		building.green = math.random( 255 )
 		building.blue = math.random( 255 )
@@ -111,7 +111,7 @@ end
 function fireBanana(thrownBy)
 	local gx, gy = thrownBy:center()
 	banana = Collider:addRectangle(gx, gy, 10, 10)
-	banana.velocity = { x = 100, y = 0}
+	banana.velocity = { x = 100, y = -45}
 	banana.thrownBy = thrownBy
 	banana.typeOf = 'banana'
 end
@@ -126,7 +126,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	end
 
 	--Collision check for building
-	if shape_a.typeOf == 'building' then
+	if shape_a.typeOf == 'building' and mtv_x ~= 0 or mtv_y ~= 0 then
 		text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 	end
 end
