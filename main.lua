@@ -10,7 +10,8 @@ function love.load()
 
 	--Generate random buildings
 	for i=0,9 do
-		local height =  100--math.random(250)
+		-- NOTE - Temp make all buildings same height for testing
+		local height =  100 --math.random(250)
 		local buildingX = i * 80
 		local buildingY = 600 - height
 		building = Collider:addRectangle( buildingX, buildingY, height, 80)
@@ -19,7 +20,6 @@ function love.load()
 		building.blue = math.random( 255 )
 		building.x = buildingX
 		building.y = buildingY
-		-- NOTE - Temp make all buildings same height for testing
 		building.typeOf = 'building'
 		table.insert(buildings, building)
 	end
@@ -29,24 +29,29 @@ function love.load()
 	gorilla1Building = buildings[math.random(5)]
 	gorilla2Building = buildings[math.random(5) + 5]
 
+	-- Instantiate gorillas
 	gorilla1 = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
 	gorilla1.typeOf = 'gorilla'
 	gorilla2 = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
 	gorilla2.typeOf = 'gorilla'
 
+	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
-
 	bananaImage = love.graphics.newImage("/images/banana.png")
+
+	--Setup banana animations
 	bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
 	Bananimation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
 end
 
 function love.update(dt)
+	-- If a banana has been thrown, attempt to move it
 	if banana then
 		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 	end
 
+	-- Remove excess debug messages
 	while #text > 40 do
 	    table.remove(text, 1)
 	end
@@ -56,11 +61,11 @@ function love.update(dt)
 end
 
 function love.draw()
-	--draw out skybox
+	--Draw sky bg
 	love.graphics.setColor(0,0,255)
 	love.graphics.rectangle("fill",0,0,800,600)
 
-	--Draw random buildings
+	--Draw buildings
 	for i,v in ipairs(buildings) do
 		love.graphics.setColor(v.red,v.green,v.blue,255);
 		v:draw('fill')
@@ -80,10 +85,11 @@ function love.draw()
 	love.graphics.draw(gorillaImage, g1x - 15 , g1y - 15 )
 	love.graphics.draw(gorillaImage, g2x - 15 , g2y - 15 )
 
-	--Draw the sun!
+	--Draw the sun
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(sunImage, 400, 25)
 
+	-- FIXME - Debug logging
 	for i = 1,#text do
 		love.graphics.setColor(255,255,255, 255 - (i-1) * 6)
 		love.graphics.print(text[#text - (i-1)], 10, i * 15)
@@ -91,9 +97,12 @@ function love.draw()
 end
 
 function love.keyreleased(key)
+	-- Fire a test banana on spacebar
 	if key == " " then
 		fireBanana(gorilla1)
 	end
+
+	-- Quit the game on escape
 	if key == "escape" then
 		love.event.push("quit")
 	end
