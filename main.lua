@@ -5,9 +5,10 @@ local text = {}
 
 function love.load()
 
-	Collider = HC(100, on_collide )
+	Collider = HC(100, on_collide, on_stopCollision )
 	buildings = {}
-	player1 = { angle = 0, velocity = 0 } 
+	explosions = {}
+	player1 = { angle = 0, velocity = 0 }
 	player2 = { angle = 0, velocity = 0 }
 
 	--Generate random buildings
@@ -51,7 +52,7 @@ function love.update(dt)
 	-- If a banana has been thrown, attempt to move it
 	if banana then
 		banana:move(banana.velocity.x*dt, banana.velocity.y*dt)
-		
+
 		--gravity!
 		banana.velocity.y = banana.velocity.y + 0.98
 	end
@@ -63,20 +64,20 @@ function love.update(dt)
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
-		player1.angle = player1.angle + 25*dt 
+		player1.angle = player1.angle + 25*dt
 	end
 
 	if love.keyboard.isDown("down") then
-		player1.angle = player1.angle - 25*dt 
+		player1.angle = player1.angle - 25*dt
 	end
 
 	-- Power controls
 	if love.keyboard.isDown("right") then
-		player1.velocity = player1.velocity + 50*dt 
+		player1.velocity = player1.velocity + 50*dt
 	end
 
 	if love.keyboard.isDown("left") then
-		player1.velocity = player1.velocity - 50*dt 
+		player1.velocity = player1.velocity - 50*dt
 	end
 
 	Bananimation:update(dt)
@@ -92,6 +93,12 @@ function love.draw()
 	for i,v in ipairs(buildings) do
 		love.graphics.setColor(v.red,v.green,v.blue,255);
 		v:draw('fill')
+	end
+
+	--Draw explosions
+	for i,v in ipairs(explosions) do
+		love.graphics.setColor(0,0,255)
+		love.graphics.circle('fill', v.x, v.y, 50, 20)
 	end
 
 	--Draw bananas
@@ -115,13 +122,14 @@ function love.draw()
 	-- FIXME - Debug logging
 	for i = 1,#text do
 		love.graphics.setColor(255,255,255, 255 - (i-1) * 6)
-		love.graphics.print(text[#text - (i-1)], 10, i * 15)
+		love.graphics.print(text[#text - (i-1)], 10, i * 15 + 50)
 	end
 
 	-- draw player fields
-		love.graphics.print("Player 1", 0, 0)
-		love.graphics.print(string.format("Angle: %s", player1.angle), 0, 20)
-		love.graphics.print(string.format("Power: %s", player1.velocity), 0, 40)
+	love.graphics.setColor(255,255,255,255)
+	love.graphics.print("Player 1", 0, 0)
+	love.graphics.print(string.format("Angle: %s", player1.angle), 0, 20)
+	love.graphics.print(string.format("Power: %s", player1.velocity), 0, 40)
 end
 
 function love.keyreleased(key)
@@ -154,17 +162,31 @@ function fireBanana(thrownBy)
 	banana.typeOf = 'banana'
 end
 
-function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
-	--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
-	if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
-		--text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
-		shape_b.velocity = { x = 0, y = 0}
-		banana = nil
-		Bananimation:pause()
-	end
+function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 
-	--Collision check for building
-	if shape_a.typeOf == 'building' and mtv_x ~= 0 or mtv_y ~= 0 then
-		--text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+end
+
+function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
+	--Collision check for existing explosion objects first and foremost
+	if shape_a.typeOf == 'explosion' then
+		text[#text+1] = 'OH MAH GOD IMMA EXPLOSIION'
+		shape_b.inExplosion = true
+	else
+		--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
+		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
+			text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
+			shape_b.velocity = { x = 0, y = 0}
+			Bananimation:pause()
+		end
+
+		--Collision check for building
+		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true and mtv_x ~= 0 or mtv_y ~= 0 then
+			text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+			local explosion = {}
+			explosion.x, explosion.y = shape_b:center()
+			explosion.typeOf = 'explosion'
+			shape_b.velocity = { x = 0, y = 0}
+			table.insert(explosions, explosion)
+		end
 	end
 end
