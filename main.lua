@@ -64,20 +64,20 @@ function love.update(dt)
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
-		player1.angle = player1.angle + 25*dt
+		player1.angle = player1.angle + 25 * dt
 	end
 
 	if love.keyboard.isDown("down") then
-		player1.angle = player1.angle - 25*dt
+		player1.angle = player1.angle - 25 * dt
 	end
 
 	-- Power controls
 	if love.keyboard.isDown("right") then
-		player1.velocity = player1.velocity + 50*dt
+		player1.velocity = player1.velocity + 75 * dt
 	end
 
 	if love.keyboard.isDown("left") then
-		player1.velocity = player1.velocity - 50*dt
+		player1.velocity = player1.velocity - 75 * dt
 	end
 
 	Bananimation:update(dt)
@@ -98,7 +98,7 @@ function love.draw()
 	--Draw explosions
 	for i,v in ipairs(explosions) do
 		love.graphics.setColor(0,0,255)
-		love.graphics.circle('fill', v.x, v.y, 50, 20)
+		v:draw('fill')
 	end
 
 	--Draw bananas
@@ -168,7 +168,7 @@ end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Collision check for existing explosion objects first and foremost
-	if shape_a.typeOf == 'explosion' then
+	if shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana' then
 		text[#text+1] = 'OH MAH GOD IMMA EXPLOSIION'
 		shape_b.inExplosion = true
 	else
@@ -182,8 +182,9 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		--Collision check for building
 		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true and mtv_x ~= 0 or mtv_y ~= 0 then
 			text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
-			local explosion = {}
-			explosion.x, explosion.y = shape_b:center()
+			local ex, ey = shape_b:center()
+			local explosion = Collider:addCircle(ex, ey, 25)
+			Collider:setGhost( explosion )
 			explosion.typeOf = 'explosion'
 			shape_b.velocity = { x = 0, y = 0}
 			table.insert(explosions, explosion)
