@@ -1,13 +1,14 @@
 HC = require "HardonCollider"
 anim8 = require "anim8/anim8"
 
-local text = {}
+local debugText = {}
 
 function love.load()
 
 	Collider = HC(100, on_collide, on_stopCollision )
 	buildings = {}
 	explosions = {}
+	bananas = {}
 	player1 = { angle = 0, velocity = 0 }
 	player2 = { angle = 0, velocity = 0 }
 
@@ -18,6 +19,7 @@ function love.load()
 		local buildingX = i * 80
 		local buildingY = 600 - height
 		building = Collider:addRectangle( buildingX, buildingY, 80, height)
+		Collider:addToGroup('sharedClipLayer',building)
 		building.red = math.random( 255 )
 		building.green = math.random( 255 )
 		building.blue = math.random( 255 )
@@ -35,8 +37,11 @@ function love.load()
 	-- Instantiate gorillas
 	gorilla1 = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
 	gorilla1.typeOf = 'gorilla'
+
 	gorilla2 = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
 	gorilla2.typeOf = 'gorilla'
+
+	Collider:addToGroup('sharedClipLayer', gorilla1, gorilla2 )
 
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
@@ -50,7 +55,8 @@ end
 
 function love.update(dt)
 	-- If a banana has been thrown, attempt to move it
-	if banana then
+	for i,banana in ipairs(bananas) do
+
 		banana:move(banana.velocity.x*dt, banana.velocity.y*dt)
 
 		--gravity!
@@ -58,8 +64,8 @@ function love.update(dt)
 	end
 
 	-- Remove excess debug messages
-	while #text > 40 do
-	    table.remove(text, 1)
+	while #debugText > 40 do
+	    table.remove(debugText, 1)
 	end
 
 	-- Angle controls
@@ -102,7 +108,7 @@ function love.draw()
 	end
 
 	--Draw bananas
-	if banana then
+	for i,banana in ipairs(bananas) do
 		local bx, by = banana:center()
 		love.graphics.setColor(255,255,255,255)
 		Bananimation:draw(bananaImage, bx, by)
@@ -120,9 +126,9 @@ function love.draw()
 	love.graphics.draw(sunImage, 400, 25)
 
 	-- FIXME - Debug logging
-	for i = 1,#text do
+	for i = 1,#debugText do
 		love.graphics.setColor(255,255,255, 255 - (i-1) * 6)
-		love.graphics.print(text[#text - (i-1)], 10, i * 15 + 50)
+		love.graphics.print(debugText[#debugText - (i-1)], 10, i * 15 + 50)
 	end
 
 	-- draw player fields
@@ -146,7 +152,7 @@ end
 
 function fireBanana(thrownBy)
 	local gx, gy = thrownBy:center()
-	banana = Collider:addRectangle(gx, gy, 10, 10)
+	local banana = Collider:addRectangle(gx , gy , 7, 7)
 
 	--banana angle (in radians) and initial impuls velocity
 	banana.angle = player1.angle*(math.pi/180)
@@ -160,33 +166,50 @@ function fireBanana(thrownBy)
 	--setup other banana vars
 	banana.thrownBy = thrownBy
 	banana.typeOf = 'banana'
+
+	if #debugText > 0 then
+		table.remove(bananas, 1)
+	end
+
+	table.insert(bananas, banana)
 end
 
 function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
-
+	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", shape_a.typeOf, shape_b.typeOf)
+	if shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana' then
+		shape_b.inExplosion = false
+	end
 end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Collision check for existing explosion objects first and foremost
 	if shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana' then
-		text[#text+1] = 'OH MAH GOD IMMA EXPLOSIION'
+		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
 		shape_b.inExplosion = true
 	else
 		--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
 		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
-			text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
+			debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			shape_b.velocity = { x = 0, y = 0}
-			Bananimation:pause()
+			table.remove(bananas, 1)
 		end
 
 		--Collision check for building
 		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true and mtv_x ~= 0 or mtv_y ~= 0 then
-			text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+			debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+
+			--Destroy the banana and remove it from collider objects
+			table.remove(bananas, 1)
+			Collider:remove(shape_b)
+
+			--Create explosion object
 			local ex, ey = shape_b:center()
-			local explosion = Collider:addCircle(ex, ey, 25)
-			Collider:setGhost( explosion )
+			local explosion = Collider:addCircle(ex, ey, 35)
+			Collider:addToGroup('sharedClipLayer',explosion)
+			-- Collider:setGhost(explosion)
 			explosion.typeOf = 'explosion'
-			shape_b.velocity = { x = 0, y = 0}
+
+			--Add explosion to the explosions table
 			table.insert(explosions, explosion)
 		end
 	end
