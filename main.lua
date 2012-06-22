@@ -7,6 +7,8 @@ function love.load()
 
 	Collider = HC(100, on_collide )
 	buildings = {}
+	player1 = { angle = 0, velocity = 0 } 
+	player2 = { angle = 0, velocity = 0 }
 
 	--Generate random buildings
 	for i=0,9 do
@@ -48,12 +50,33 @@ end
 function love.update(dt)
 	-- If a banana has been thrown, attempt to move it
 	if banana then
-		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
+		banana:move(banana.velocity.x*dt, banana.velocity.y*dt)
+		
+		--gravity!
+		banana.velocity.y = banana.velocity.y + 0.98
 	end
 
 	-- Remove excess debug messages
 	while #text > 40 do
 	    table.remove(text, 1)
+	end
+
+	-- Angle controls
+	if love.keyboard.isDown("up") then
+		player1.angle = player1.angle + 25*dt 
+	end
+
+	if love.keyboard.isDown("down") then
+		player1.angle = player1.angle - 25*dt 
+	end
+
+	-- Power controls
+	if love.keyboard.isDown("right") then
+		player1.velocity = player1.velocity + 50*dt 
+	end
+
+	if love.keyboard.isDown("left") then
+		player1.velocity = player1.velocity - 50*dt 
 	end
 
 	Bananimation:update(dt)
@@ -94,6 +117,11 @@ function love.draw()
 		love.graphics.setColor(255,255,255, 255 - (i-1) * 6)
 		love.graphics.print(text[#text - (i-1)], 10, i * 15)
 	end
+
+	-- draw player fields
+		love.graphics.print("Player 1", 0, 0)
+		love.graphics.print(string.format("Angle: %s", player1.angle), 0, 20)
+		love.graphics.print(string.format("Power: %s", player1.velocity), 0, 40)
 end
 
 function love.keyreleased(key)
@@ -111,7 +139,17 @@ end
 function fireBanana(thrownBy)
 	local gx, gy = thrownBy:center()
 	banana = Collider:addRectangle(gx, gy, 10, 10)
-	banana.velocity = { x = 100, y = math.random(-100, 0) }
+
+	--banana angle (in radians) and initial impuls velocity
+	banana.angle = player1.angle*(math.pi/180)
+	banana.impulse = player1.velocity
+
+	--calc velocity for x and y vectors
+	banana.velocity = { }
+	banana.velocity.x = banana.impulse * math.cos(banana.angle)
+	banana.velocity.y = banana.impulse * math.sin(banana.angle) * -1
+
+	--setup other banana vars
 	banana.thrownBy = thrownBy
 	banana.typeOf = 'banana'
 end
@@ -119,7 +157,7 @@ end
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
 	if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
-		text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
+		--text[#text+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 		shape_b.velocity = { x = 0, y = 0}
 		banana = nil
 		Bananimation:pause()
@@ -127,6 +165,6 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 	--Collision check for building
 	if shape_a.typeOf == 'building' and mtv_x ~= 0 or mtv_y ~= 0 then
-		text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+		--text[#text+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 	end
 end
