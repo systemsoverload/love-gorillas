@@ -1,1 +1,8 @@
 QBasic Gorillas Clone Re-Implemented With Love2D
+
+TODO -
+	* Add turns & player 2 controls
+	* Smooth out explosion on explosion action
+	* Add explosion animation
+	* Add victory condition when gorilla gets hit
+	* Skin buildings with OG graphics
