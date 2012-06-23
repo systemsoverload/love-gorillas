@@ -43,6 +43,10 @@ function love.load()
 
 	Collider:addToGroup('groupB', gorilla1, gorilla2 )
 
+	-- Instantiate sun
+	-- sun = Collider:addRectangle(400, 25)
+	-- sun.typeOf = 'sun'
+
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
@@ -184,9 +188,10 @@ end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Collision check for existing explosion objects first and foremost
-	if shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana' then
+	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_a.typeOf == 'banana' and shape_b.typeOf == 'explosion') then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
 		shape_b.inExplosion = true
+	--elseif shape
 	else
 		--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
 		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
