@@ -187,10 +187,24 @@ end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Collision check for existing explosion objects first and foremost
-	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_a.typeOf == 'banana' and shape_b.typeOf == 'explosion') then
+	local _banana
+	local _other
+	if (shape_a.typeOf == 'banana') then
+		_banana = shape_a
+		_other = shape_b
+	elseif (shape_b.typeOf == 'banana') then
+		_banana = shape_b
+		_other = shape_a
+	end
+
+
+
+	if ( _banana and _other == 'explosion' ) then
+
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-		shape_b.inExplosion = true
-	--elseif shape
+		_banana.inExplosion = true
+	elseif (shape_a.typeOf == 'sun' and shape_b.typeOf == 'banana') or (shape_a.typeOf == 'banana' and shape_b.typeOf == 'sun') then
+
 	else
 		--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
 		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
