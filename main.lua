@@ -155,7 +155,7 @@ function love.keyreleased(key)
 end
 
 function fireBanana(thrownBy)
-	local gx, gy = thrownBy:center()
+	local gx, gy = gorilla1:center()
 	local banana = Collider:addRectangle(gx , gy , 7, 7)
 
 	--banana angle (in radians) and initial impuls velocity
@@ -180,29 +180,26 @@ end
 
 function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", shape_a.typeOf, shape_b.typeOf)
-	if shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana' then
-		shape_b.inExplosion = false
+	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_b.typeOf == 'explosion' and shape_a.typeOf == 'banana') then
+		if shape_b.typeOf == 'banana' then
+			shape_b.inExplosion = false
+		else
+			shape_a.inExplosion = false
+		end
 	end
 end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
-	--Collision check for existing explosion objects first and foremost
-	local _banana
-	local _other
-	if (shape_a.typeOf == 'banana') then
-		_banana = shape_a
-		_other = shape_b
-	elseif (shape_b.typeOf == 'banana') then
-		_banana = shape_b
-		_other = shape_a
-	end
 
-
-
-	if ( _banana and _other == 'explosion' ) then
-
+	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_b.typeOf == 'explosion' and shape_a.typeOf == 'banana') then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-		_banana.inExplosion = true
+
+		if shape_b.typeOf == 'banana' then
+			shape_b.inExplosion = true
+		else
+			shape_a.inExplosion = true
+		end
+
 	elseif (shape_a.typeOf == 'sun' and shape_b.typeOf == 'banana') or (shape_a.typeOf == 'banana' and shape_b.typeOf == 'sun') then
 
 	else
@@ -214,7 +211,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		end
 
 		--Collision check for building
-		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true and mtv_x ~= 0 or mtv_y ~= 0 then
+		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true then
 			debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 
 			--Destroy the banana and remove it from collider objects
