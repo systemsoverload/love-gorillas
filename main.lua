@@ -108,7 +108,7 @@ function love.draw()
 	--Draw explosions
 	for i,v in ipairs(explosions) do
 		love.graphics.setColor(0,0,255)
-		v:draw('fill')
+		v:draw("fill")
 	end
 
 	--Draw the gorillas
@@ -170,6 +170,7 @@ function fireBanana(thrownBy)
 	--setup other banana vars
 	banana.thrownBy = thrownBy
 	banana.typeOf = 'banana'
+	banana.inExplosion = false
 
 	if #debugText > 0 then
 		table.remove(bananas, 1)
@@ -193,11 +194,15 @@ function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 		return
 	end
 
-	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", banana.typeOf, other.typeOf)
-
 	if other.typeOf == 'explosion' then
-		if #bananas > 0 then
-			Collider:setSolid(banana)
+		local intersectsExplosion = false
+		for i,v in ipairs(explosions) do
+			if v:contains(banana:center()) then
+				intersectsExplosion = true
+			end
+		end
+		if intersectsExplosion == false then
+			banana.inExplosion = false
 		end
 	end
 end
@@ -220,11 +225,10 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Explosion collision handler
 	if other.typeOf == 'explosion' then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-		if #bananas > 0 then
-			Collider:setGhost(banana)
-		end
+		banana.inExplosion = true
+		return
 	--Building collision handler
-	elseif other.typeOf == 'building' then
+	elseif other.typeOf == 'building' and banana.inExplosion == false then
 		debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 
 		--Destroy the banana and remove it from collider objects
