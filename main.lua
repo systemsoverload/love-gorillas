@@ -111,8 +111,7 @@ function love.draw()
 	for i,banana in ipairs(bananas) do
 		local bx, by = banana:center()
 		love.graphics.setColor(255,255,255,255)
-		banana:draw('fill')
-		Bananimation:draw(bananaImage, bx, by)
+		Bananimation:draw(bananaImage, bx - 3.5, by - 3.5)
 	end
 
 	--Draw the gorillas
