@@ -111,19 +111,19 @@ function love.draw()
 		v:draw('fill')
 	end
 
-	--Draw bananas
-	for i,banana in ipairs(bananas) do
-		local bx, by = banana:center()
-		love.graphics.setColor(255,255,255,255)
-		Bananimation:draw(bananaImage, bx - 3.5, by - 3.5)
-	end
-
 	--Draw the gorillas
 	local g1x, g1y = gorilla1:center()
 	local g2x, g2y = gorilla2:center()
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(gorillaImage, g1x - 15 , g1y - 15 )
 	love.graphics.draw(gorillaImage, g2x - 15 , g2y - 15 )
+
+	--Draw bananas
+	for i,banana in ipairs(bananas) do
+		local bx, by = banana:center()
+		love.graphics.setColor(255,255,255,255)
+		Bananimation:draw(bananaImage, bx - 3.5, by - 3.5)
+	end
 
 	--Draw the sun
 	love.graphics.setColor(255,255,255,255)
@@ -179,34 +179,37 @@ function fireBanana(thrownBy)
 end
 
 function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
-	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", shape_a.typeOf, shape_b.typeOf)
-	local xxx
-	local yyy
+	local other
+	local banana
 
 	--Figure out which collision object is our banana, pass if neither
-	if (shape_a.typeOf == 'banana') then
-		xxx = shape_a
-		yyy = shape_b
-	elseif (shape_b.typeOf == 'banana') then
-		xxx = shape_b
-		yyy = shape_a
+	if shape_a.typeOf == 'banana' then
+		banana = shape_a
+		other = shape_b
+	elseif shape_b.typeOf == 'banana' then
+		banana = shape_b
+		other = shape_a
 	else
 		return
 	end
 
-	if yyy.typeOf == 'explosion' then
-		Collider:setSolid(xxx)
+	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", banana.typeOf, other.typeOf)
+
+	if other.typeOf == 'explosion' then
+		--debugText[#debugText+1] = banana.typeOf
+		Collider:setSolid(banana)
 	end
 end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	local other
 	local banana
+
 	--Figure out which collision object is our banana, pass if neither
-	if (shape_a.typeOf == 'banana') then
+	if shape_a.typeOf == 'banana' then
 		banana = shape_a
 		other = shape_b
-	elseif (shape_b.typeOf == 'banana') then
+	elseif shape_b.typeOf == 'banana' then
 		banana = shape_b
 		other = shape_a
 	else
@@ -214,13 +217,12 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	end
 
 	--Explosion collision handler
-	if (other.typeOf == 'explosion') then
+	if other.typeOf == 'explosion' then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
 		Collider:setGhost(banana)
-	end
-
+		banana.inExplosion = true
 	--Building collision handler
-	if other.typeOf == 'building' and banana.inExplosion ~= true then
+	elseif other.typeOf == 'building' then
 		debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 
 		--Destroy the banana and remove it from collider objects
@@ -230,15 +232,14 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		--Create explosion object
 		local ex, ey = banana:center()
 		local explosion = Collider:addCircle(ex, ey, 35)
-		Collider:addToGroup('groupB',explosion)
+		Collider:addToGroup( 'groupB', explosion )
 		explosion.typeOf = 'explosion'
 
 		--Add explosion to the explosions table
 		table.insert(explosions, explosion)
-	end
 
 	--Gorilla collision handler
-	if other.typeOf == 'gorilla' then
+	elseif other.typeOf == 'gorilla' then
 		if banana.thrownBy ~= other then
 			debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			banana.velocity = { x = 0, y = 0}
