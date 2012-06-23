@@ -19,7 +19,7 @@ function love.load()
 		local buildingX = i * 80
 		local buildingY = 600 - height
 		building = Collider:addRectangle( buildingX, buildingY, 80, height)
-		Collider:addToGroup('sharedClipLayer',building)
+		Collider:addToGroup('groupB',building)
 		building.red = math.random( 255 )
 		building.green = math.random( 255 )
 		building.blue = math.random( 255 )
@@ -41,7 +41,7 @@ function love.load()
 	gorilla2 = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
 	gorilla2.typeOf = 'gorilla'
 
-	Collider:addToGroup('sharedClipLayer', gorilla1, gorilla2 )
+	Collider:addToGroup('groupB', gorilla1, gorilla2 )
 
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
@@ -111,6 +111,7 @@ function love.draw()
 	for i,banana in ipairs(bananas) do
 		local bx, by = banana:center()
 		love.graphics.setColor(255,255,255,255)
+		banana:draw('fill')
 		Bananimation:draw(bananaImage, bx, by)
 	end
 
@@ -205,7 +206,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			--Create explosion object
 			local ex, ey = shape_b:center()
 			local explosion = Collider:addCircle(ex, ey, 35)
-			Collider:addToGroup('sharedClipLayer',explosion)
+			Collider:addToGroup('groupB',explosion)
 			-- Collider:setGhost(explosion)
 			explosion.typeOf = 'explosion'
 
