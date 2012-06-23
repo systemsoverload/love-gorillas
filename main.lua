@@ -180,12 +180,22 @@ end
 
 function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", shape_a.typeOf, shape_b.typeOf)
-	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_b.typeOf == 'explosion' and shape_a.typeOf == 'banana') then
-		if shape_b.typeOf == 'banana' then
-			shape_b.inExplosion = false
-		else
-			shape_a.inExplosion = false
-		end
+	local xxx
+	local yyy
+
+	--Figure out which collision object is our banana, pass if neither
+	if (shape_a.typeOf == 'banana') then
+		xxx = shape_a
+		yyy = shape_b
+	elseif (shape_b.typeOf == 'banana') then
+		xxx = shape_b
+		yyy = shape_a
+	else
+		return
+	end
+
+	if yyy.typeOf == 'explosion' then
+		Collider:setSolid(xxx)
 	end
 end
 
@@ -206,7 +216,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Explosion collision handler
 	if (other.typeOf == 'explosion') then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-		banana.inExplosion = true
+		Collider:setGhost(banana)
 	end
 
 	--Building collision handler
@@ -215,13 +225,12 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 		--Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
-		Collider:remove(shape_b)
+		Collider:remove(banana)
 
 		--Create explosion object
-		local ex, ey = shape_b:center()
+		local ex, ey = banana:center()
 		local explosion = Collider:addCircle(ex, ey, 35)
 		Collider:addToGroup('groupB',explosion)
-		-- Collider:setGhost(explosion)
 		explosion.typeOf = 'explosion'
 
 		--Add explosion to the explosions table
@@ -230,9 +239,9 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 	--Gorilla collision handler
 	if other.typeOf == 'gorilla' then
-		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
+		if banana.thrownBy ~= other then
 			debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
-			shape_b.velocity = { x = 0, y = 0}
+			banana.velocity = { x = 0, y = 0}
 			table.remove(bananas, 1)
 		end
 	end
