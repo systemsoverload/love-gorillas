@@ -190,43 +190,51 @@ function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 end
 
 function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
-
-	if (shape_a.typeOf == 'explosion' and shape_b.typeOf == 'banana') or (shape_b.typeOf == 'explosion' and shape_a.typeOf == 'banana') then
-		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-
-		if shape_b.typeOf == 'banana' then
-			shape_b.inExplosion = true
-		else
-			shape_a.inExplosion = true
-		end
-
-	elseif (shape_a.typeOf == 'sun' and shape_b.typeOf == 'banana') or (shape_a.typeOf == 'banana' and shape_b.typeOf == 'sun') then
-
+	local other
+	local banana
+	--Figure out which collision object is our banana, pass if neither
+	if (shape_a.typeOf == 'banana') then
+		banana = shape_a
+		other = shape_b
+	elseif (shape_b.typeOf == 'banana') then
+		banana = shape_b
+		other = shape_a
 	else
-		--Collision check for gorillas, make sure it's not a gorilla hitting itself on the throw
+		return
+	end
+
+	--Explosion collision handler
+	if (other.typeOf == 'explosion') then
+		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
+		banana.inExplosion = true
+	end
+
+	--Building collision handler
+	if other.typeOf == 'building' and banana.inExplosion ~= true then
+		debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
+
+		--Destroy the banana and remove it from collider objects
+		table.remove(bananas, 1)
+		Collider:remove(shape_b)
+
+		--Create explosion object
+		local ex, ey = shape_b:center()
+		local explosion = Collider:addCircle(ex, ey, 35)
+		Collider:addToGroup('groupB',explosion)
+		-- Collider:setGhost(explosion)
+		explosion.typeOf = 'explosion'
+
+		--Add explosion to the explosions table
+		table.insert(explosions, explosion)
+	end
+
+	--Gorilla collision handler
+	if other.typeOf == 'gorilla' then
 		if shape_a.typeOf == 'gorilla' and shape_b.thrownBy and shape_b.thrownBy ~= shape_a then
 			debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			shape_b.velocity = { x = 0, y = 0}
 			table.remove(bananas, 1)
 		end
-
-		--Collision check for building
-		if shape_a.typeOf == 'building' and shape_b.inExplosion ~= true then
-			debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
-
-			--Destroy the banana and remove it from collider objects
-			table.remove(bananas, 1)
-			Collider:remove(shape_b)
-
-			--Create explosion object
-			local ex, ey = shape_b:center()
-			local explosion = Collider:addCircle(ex, ey, 35)
-			Collider:addToGroup('groupB',explosion)
-			-- Collider:setGhost(explosion)
-			explosion.typeOf = 'explosion'
-
-			--Add explosion to the explosions table
-			table.insert(explosions, explosion)
-		end
 	end
+
 end
