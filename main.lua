@@ -196,8 +196,9 @@ function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	debugText[#debugText+1] = string.format("Collision stopped with - (%s) & (%s)", banana.typeOf, other.typeOf)
 
 	if other.typeOf == 'explosion' then
-		--debugText[#debugText+1] = banana.typeOf
-		Collider:setSolid(banana)
+		if #bananas > 0 then
+			Collider:setSolid(banana)
+		end
 	end
 end
 
@@ -219,8 +220,9 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Explosion collision handler
 	if other.typeOf == 'explosion' then
 		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
-		Collider:setGhost(banana)
-		banana.inExplosion = true
+		if #bananas > 0 then
+			Collider:setGhost(banana)
+		end
 	--Building collision handler
 	elseif other.typeOf == 'building' then
 		debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
