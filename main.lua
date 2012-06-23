@@ -44,11 +44,12 @@ function love.load()
 	Collider:addToGroup('groupB', gorilla1, gorilla2 )
 
 	-- Instantiate sun
-	-- sun = Collider:addRectangle(400, 25)
-	-- sun.typeOf = 'sun'
+	sun = Collider:addRectangle(400, 25, 41, 31)
+	sun.typeOf = 'sun'
 
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
+	sunHitImage = love.graphics.newImage("/images/sunHit.png")
 	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
 	bananaImage = love.graphics.newImage("/images/banana.png")
 
@@ -127,7 +128,11 @@ function love.draw()
 
 	--Draw the sun
 	love.graphics.setColor(255,255,255,255)
-	love.graphics.draw(sunImage, 400, 25)
+	if sun.wasHit == true then
+		love.graphics.draw(sunHitImage, 400, 25)
+	else
+		love.graphics.draw(sunImage, 400, 25)
+	end
 
 	-- FIXME - Debug logging
 	for i = 1,#debugText do
@@ -172,7 +177,7 @@ function fireBanana(thrownBy)
 	banana.typeOf = 'banana'
 	banana.inExplosion = false
 
-	if #debugText > 0 then
+	if #bananas > 0 then
 		table.remove(bananas, 1)
 	end
 
@@ -224,12 +229,11 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 	--Explosion collision handler
 	if other.typeOf == 'explosion' then
-		debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
+		-- debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
 		banana.inExplosion = true
 		return
 	--Building collision handler
 	elseif other.typeOf == 'building' and banana.inExplosion == false then
-		debugText[#debugText+1] = string.format("Banana Colliding With BUILDING - (%s,%s)", mtv_x, mtv_y)
 
 		--Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
@@ -237,7 +241,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 		--Create explosion object
 		local ex, ey = banana:center()
-		local explosion = Collider:addCircle(ex, ey, 35)
+		local explosion = Collider:addCircle(ex, ey, 10)
 		Collider:addToGroup( 'groupB', explosion )
 		explosion.typeOf = 'explosion'
 
@@ -247,10 +251,12 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
 		if banana.thrownBy ~= other then
-			debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
+			-- debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			banana.velocity = { x = 0, y = 0}
 			table.remove(bananas, 1)
 		end
+	elseif other.typeOf == 'sun' then
+		other.wasHit = true
 	end
 
 end
