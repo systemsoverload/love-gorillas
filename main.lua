@@ -65,7 +65,7 @@ function love.update(dt)
 		banana:move(banana.velocity.x*dt, banana.velocity.y*dt)
 
 		--gravity!
-		banana.velocity.y = banana.velocity.y + 0.98
+		banana.velocity.y = banana.velocity.y + ( dt * 80 )
 	end
 
 	-- Remove excess debug messages
