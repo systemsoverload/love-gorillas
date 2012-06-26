@@ -33,20 +33,17 @@ function love.load()
 		building = Collider:addRectangle( buildingX, buildingY, 78, height)
 		building.height = height
 		Collider:addToGroup('groupB',building)
-		building.red = math.random( 255 )
-		building.green = math.random( 255 )
-		building.blue = math.random( 255 )
 		building.x = buildingX
 		building.y = buildingY
 		building.typeOf = 'building'
 		building.image = buildingImage
 		building.quad = love.graphics.newQuad(
-			0
-			, 0
-			, 79
-			, height
-			, buildingImage:getWidth()
-			, buildingImage:getHeight()
+			0 --Starting x
+			, 0 --Starting y
+			, 79 --Quad width
+			, height --Quad Height
+			, buildingImage:getWidth() --Image width
+			, buildingImage:getHeight() --Image height
 		)
 		table.insert(buildings, building)
 	end
@@ -124,8 +121,6 @@ function love.draw()
 
 	--Draw buildings
 	for i,v in ipairs(buildings) do
-		love.graphics.setColor(v.red,v.green,v.blue,255)
-		v:draw('fill')
 		love.graphics.setColor(255,255,255,255)
 		-- love.graphics.drawq(img, bottom_left, 50, 200)
 		love.graphics.drawq(v.image, v.quad, v.x, v.y)
