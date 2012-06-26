@@ -6,19 +6,32 @@ local debugText = {}
 function love.load()
 
 	Collider = HC(100, on_collide, on_stopCollision )
-	buildings = {}
-	explosions = {}
-	bananas = {}
+	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
+
 	player1 = { angle = 0, velocity = 0 }
 	player2 = { angle = 0, velocity = 0 }
 
+	--Setup building images and prep for randomization
+	local buildingRedImage = love.graphics.newImage("/images/building_red.png")
+	buildingRedImage:setWrap('repeat', 'repeat')
+	table.insert(buildingImages, buildingRedImage)
+
+	local buildingGrayImage = love.graphics.newImage("/images/building_gray.png")
+	buildingGrayImage:setWrap('repeat', 'repeat')
+	table.insert(buildingImages, buildingGrayImage)
+
+	local buildingBlueImage = love.graphics.newImage("/images/building_blue.png")
+	buildingBlueImage:setWrap('repeat', 'repeat')
+	table.insert(buildingImages, buildingBlueImage)
+
 	--Generate random buildings
 	for i=0,9 do
-		-- NOTE - Temp make all buildings same height for testing
 		local height =  math.random(40, 250)
-		local buildingX = i * 80
+		local buildingX = i * 80 - 1
 		local buildingY = 600 - height
-		building = Collider:addRectangle( buildingX, buildingY, 80, height)
+		local buildingImage = buildingImages[math.random( 3 )]
+		building = Collider:addRectangle( buildingX, buildingY, 78, height)
+		building.height = height
 		Collider:addToGroup('groupB',building)
 		building.red = math.random( 255 )
 		building.green = math.random( 255 )
@@ -26,6 +39,15 @@ function love.load()
 		building.x = buildingX
 		building.y = buildingY
 		building.typeOf = 'building'
+		building.image = buildingImage
+		building.quad = love.graphics.newQuad(
+			0
+			, 0
+			, 79
+			, height
+			, buildingImage:getWidth()
+			, buildingImage:getHeight()
+		)
 		table.insert(buildings, building)
 	end
 
@@ -70,7 +92,7 @@ function love.update(dt)
 
 	-- Remove excess debug messages
 	while #debugText > 40 do
-	    table.remove(debugText, 1)
+		table.remove(debugText, 1)
 	end
 
 	-- Angle controls
@@ -102,8 +124,12 @@ function love.draw()
 
 	--Draw buildings
 	for i,v in ipairs(buildings) do
-		love.graphics.setColor(v.red,v.green,v.blue,255);
+		love.graphics.setColor(v.red,v.green,v.blue,255)
 		v:draw('fill')
+		love.graphics.setColor(255,255,255,255)
+		-- love.graphics.drawq(img, bottom_left, 50, 200)
+		love.graphics.drawq(v.image, v.quad, v.x, v.y)
+		-- love.graphics.draw(buildingRedImage, v.x, v.y)
 	end
 
 	--Draw explosions
