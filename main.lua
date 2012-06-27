@@ -54,11 +54,19 @@ function love.update(dt)
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
-		currentPlayer.angle = currentPlayer.angle + 25 * dt
+		if currentPlayer.angle + 25 * dt > 360 then
+			currentPlayer.angle = 360
+		else
+			currentPlayer.angle = currentPlayer.angle + 25 * dt
+		end
 	end
 
 	if love.keyboard.isDown("down") then
-		currentPlayer.angle = currentPlayer.angle - 25 * dt
+		if currentPlayer.angle - 25 * dt < 0 then
+			currentPlayer.angle = 0
+		else
+			currentPlayer.angle = currentPlayer.angle - 25 * dt
+		end
 	end
 
 	-- Power controls
