@@ -172,9 +172,16 @@ end
 function fireBanana()
 	local gx, gy = currentPlayer.gorilla:center()
 	local banana = Collider:addRectangle(gx , gy , 7, 7)
+	local angle
+
+	if currentPlayer == player2 then
+		angle = 180 - currentPlayer.angle
+	else
+		angle = currentPlayer.angle
+	end
 
 	--banana angle (in radians) and initial impuls velocity
-	banana.angle = currentPlayer.angle*(math.pi/180)
+	banana.angle = angle * (math.pi/180)
 	banana.impulse = currentPlayer.velocity
 
 	--calc velocity for x and y vectors
