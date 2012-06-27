@@ -1,11 +1,9 @@
 HC = require "HardonCollider"
 anim8 = require "anim8/anim8"
 
-local debugText = {}
-
 function love.load()
 
-	Collider = HC(100, on_collide, on_stopCollision )
+	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 
 	player1 = { angle = 0, velocity = 0, score = 0, name = 'Player 1' , inputsX = 5, inputsY = 5 }
@@ -27,42 +25,7 @@ function love.load()
 	table.insert(buildingImages, buildingBlueImage)
 
 	--Generate random buildings
-	for i=0,9 do
-		local height =  math.random(40, 250)
-		local buildingX = i * 80 - 1
-		local buildingY = 600 - height
-		local buildingImage = buildingImages[math.random( 3 )]
-		building = Collider:addRectangle( buildingX, buildingY, 78, height)
-		building.height = height
-		Collider:addToGroup('groupB',building)
-		building.x = buildingX
-		building.y = buildingY
-		building.typeOf = 'building'
-		building.image = buildingImage
-		building.quad = love.graphics.newQuad(
-			0 --Starting x
-			, 0 --Starting y
-			, 79 --Quad width
-			, height --Quad Height
-			, buildingImage:getWidth() --Image width
-			, buildingImage:getHeight() --Image height
-		)
-		table.insert(buildings, building)
-	end
-
-	--Grab random buildings from the table
-	--Gorilla1 is constrained to the left half of the screen, and gorilla2 the right
-	gorilla1Building = buildings[math.random(5)]
-	gorilla2Building = buildings[math.random(5) + 5]
-
-	-- Instantiate gorillas
-	player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
-	player1.gorilla.typeOf = 'gorilla'
-
-	player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
-	player2.gorilla.typeOf = 'gorilla'
-
-	Collider:addToGroup('groupB', gorilla1, gorilla2 )
+	generateLevel()
 
 	-- Instantiate sun
 	sun = Collider:addRectangle(400, 25, 41, 31)
@@ -82,16 +45,11 @@ end
 function love.update(dt)
 	-- If a banana has been thrown, attempt to move it
 	for i,banana in ipairs(bananas) do
-
+		-- Move da banana!
 		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 
-		--gravity!
+		-- gravity!
 		banana.velocity.y = banana.velocity.y + ( dt * 80 )
-	end
-
-	-- Remove excess debug messages
-	while #debugText > 40 do
-		table.remove(debugText, 1)
 	end
 
 	-- Angle controls
@@ -157,12 +115,6 @@ function love.draw()
 		love.graphics.draw(sunImage, 400, 25)
 	end
 
-	-- FIXME - Debug logging
-	for i = 1,#debugText do
-		love.graphics.setColor(255,255,255, 255 - (i-1) * 6)
-		love.graphics.print(debugText[#debugText - (i-1)], 10, i * 15 + 50)
-	end
-
 	-- draw player fields
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.print(currentPlayer.name, currentPlayer.inputsX, currentPlayer.inputsY)
@@ -189,6 +141,10 @@ function love.keyreleased(key)
 	end
 end
 
+-------------------------------------
+-- Spawn a banana and start it moving along a given angle at a given speed
+-- @method fireBanana
+-------------------------------------
 function fireBanana()
 	local gx, gy = currentPlayer.gorilla:center()
 	local banana = Collider:addRectangle(gx , gy , 7, 7)
@@ -199,8 +155,9 @@ function fireBanana()
 
 	--calc velocity for x and y vectors
 	banana.velocity = { }
-	banana.velocity.x = banana.impulse * math.cos(banana.angle)
-	banana.velocity.y = banana.impulse * math.sin(banana.angle) * -1
+	--double the impulse value so you dont have to enter such a large value
+	banana.velocity.x = ( banana.impulse * 2 ) * math.cos(banana.angle)
+	banana.velocity.y = ( banana.impulse * 2 ) * math.sin(banana.angle) * -1
 
 	--setup other banana vars
 	banana.thrownBy = currentPlayer.gorilla
@@ -214,7 +171,16 @@ function fireBanana()
 	table.insert(bananas, banana)
 end
 
-function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
+-------------------------------------
+-- Method to be called when two HC objects stop colliding
+-- @method onStopCollision
+-- @param dt - delta
+-- @param shape_a - The first of the two colliding shapes
+-- @param shape_b - The second of the two colliding shapes
+-- @param mtv_x - Minimum translation vector x coord
+-- @param mtv_y - Minimum translation vector y coord
+-------------------------------------
+function onStopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	local other
 	local banana
 
@@ -242,7 +208,16 @@ function on_stopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	end
 end
 
-function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
+-------------------------------------
+-- Method to be called when two HC objects start colliding
+-- @method onCollide
+-- @param dt - delta
+-- @param shape_a - The first of the two colliding shapes
+-- @param shape_b - The second of the two colliding shapes
+-- @param mtv_x - Minimum translation vector x coord
+-- @param mtv_y - Minimum translation vector y coord
+-------------------------------------
+function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	local other
 	local banana
 
@@ -259,7 +234,6 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 	--Explosion collision handler
 	if other.typeOf == 'explosion' then
-		-- debugText[#debugText+1] = 'Banana colliding with EXPLOSION'
 		banana.inExplosion = true
 		return
 	--Building collision handler
@@ -284,13 +258,14 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
 		if banana.thrownBy ~= other then
+			--give a point to the thrower
 			currentPlayer.score = currentPlayer.score + 1
-			-- debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
-			banana.velocity = { x = 0, y = 0}
 			Collider:remove(banana)
 			table.remove(bananas, 1)
-			--Change turns
-			changeTurn()
+			--Clear any collision objects from the previous level
+			cleanupObjects()
+			--Generate new level
+			generateLevel()
 		end
 	elseif other.typeOf == 'sun' then
 		--Set the wasHit flag on the sun to change to the oh-face
@@ -306,4 +281,67 @@ function changeTurn()
 	end
 	--Clear the oh-face off of the sun
 	sun.wasHit = false
+end
+
+-------------------------------------
+-- Generate random buildings and place gorillas randomly on top of them
+-- @method generateLevel
+-------------------------------------
+function generateLevel()
+	--Generate random buildings
+	for i=0,9 do
+		local height =  math.random(40, 250)
+		local buildingX = i * 80 - 1
+		local buildingY = 600 - height
+		local buildingImage = buildingImages[math.random( 3 )]
+		building = Collider:addRectangle( buildingX, buildingY, 78, height)
+		building.height = height
+		Collider:addToGroup('groupB',building)
+		building.x = buildingX
+		building.y = buildingY
+		building.typeOf = 'building'
+		building.image = buildingImage
+		building.quad = love.graphics.newQuad(
+			0 --Starting x
+			, 0 --Starting y
+			, 79 --Quad width
+			, height --Quad Height
+			, buildingImage:getWidth() --Image width
+			, buildingImage:getHeight() --Image height
+		)
+		table.insert(buildings, building)
+	end
+
+	--Grab random buildings from the table
+	--Gorilla1 is constrained to the left half of the screen, and gorilla2 the right
+	gorilla1Building = buildings[math.random(5)]
+	gorilla2Building = buildings[math.random(5) + 5]
+
+	-- Instantiate gorillas
+	player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	player1.gorilla.typeOf = 'gorilla'
+
+	player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
+	player2.gorilla.typeOf = 'gorilla'
+
+	Collider:addToGroup('groupB', player1.gorilla, player2.gorilla )
+end
+
+-------------------------------------
+-- Method to clean up any left over collision objects when re-generating levels
+-- @method cleanupObjects
+-------------------------------------
+function cleanupObjects()
+
+	for i,v in ipairs(buildings) do
+		Collider:remove(v)
+	end
+	buildings = {}
+
+	for i,v in ipairs(buildings) do
+		Collider:remove(v)
+	end
+	explosions = {}
+
+	Collider:remove( player1.gorilla, player2.gorilla, banana )
 end
