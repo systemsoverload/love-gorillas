@@ -262,10 +262,14 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			currentPlayer.score = currentPlayer.score + 1
 			Collider:remove(banana)
 			table.remove(bananas, 1)
+
 			--Clear any collision objects from the previous level
 			cleanupObjects()
 			--Generate new level
 			generateLevel()
+			-- Change turns
+			changeTurns()
+
 		end
 	elseif other.typeOf == 'sun' then
 		--Set the wasHit flag on the sun to change to the oh-face
