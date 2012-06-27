@@ -75,7 +75,11 @@ function love.update(dt)
 	end
 
 	if love.keyboard.isDown("left") then
-		currentPlayer.velocity = currentPlayer.velocity - 75 * dt
+		if currentPlayer.velocity - 75 * dt < 0 then
+			currentPlayer.velocity = 0
+		else
+			currentPlayer.velocity = currentPlayer.velocity - 75 * dt
+		end
 	end
 
 	Bananimation:update(dt)
