@@ -1,6 +1,7 @@
 QBasic Gorillas Clone Re-Implemented With Love2D
 
 TODO -
+	* Reverse player2 angle
 	* Add sounds!
 	* Add explosion animation
 	* Smooth out explosion on explosion action
