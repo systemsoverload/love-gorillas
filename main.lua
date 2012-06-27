@@ -279,11 +279,7 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		table.insert(explosions, explosion)
 
 		--Change turns
-		if currentPlayer == player1 then
-			currentPlayer = player2
-		elseif currentPlayer == player2 then
-			currentPlayer = player1
-		end
+		changeTurn()
 
 	--Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
@@ -293,8 +289,21 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			banana.velocity = { x = 0, y = 0}
 			Collider:remove(banana)
 			table.remove(bananas, 1)
+			--Change turns
+			changeTurn()
 		end
 	elseif other.typeOf == 'sun' then
+		--Set the wasHit flag on the sun to change to the oh-face
 		other.wasHit = true
 	end
+end
+
+function changeTurn()
+	if currentPlayer == player1 then
+		currentPlayer = player2
+	elseif currentPlayer == player2 then
+		currentPlayer = player1
+	end
+	--Clear the oh-face off of the sun
+	sun.wasHit = false
 end
