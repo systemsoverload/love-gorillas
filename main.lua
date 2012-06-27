@@ -140,7 +140,7 @@ function love.draw()
 		else
 			winner = player2
 		end
-		love.graphics.print(string.format("%s wins!", winner.name, 320, 345))
+		love.graphics.print(string.format("%s wins!", winner.name), 320, 345)
 	end
 
 end
