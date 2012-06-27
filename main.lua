@@ -8,8 +8,10 @@ function love.load()
 	Collider = HC(100, on_collide, on_stopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 
-	player1 = { angle = 0, velocity = 0, score = 0 }
-	player2 = { angle = 0, velocity = 0, score = 0 }
+	player1 = { angle = 0, velocity = 0, score = 0, name = 'Player 1' , inputsX = 5, inputsY = 5 }
+	player2 = { angle = 0, velocity = 0, score = 0, name = 'Player 2' , inputsX = 720, inputsY = 5 }
+
+	currentPlayer = player1
 
 	--Setup building images and prep for randomization
 	local buildingRedImage = love.graphics.newImage("/images/building_red.png")
@@ -54,11 +56,11 @@ function love.load()
 	gorilla2Building = buildings[math.random(5) + 5]
 
 	-- Instantiate gorillas
-	gorilla1 = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
-	gorilla1.typeOf = 'gorilla'
+	player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	player1.gorilla.typeOf = 'gorilla'
 
-	gorilla2 = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
-	gorilla2.typeOf = 'gorilla'
+	player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
+	player2.gorilla.typeOf = 'gorilla'
 
 	Collider:addToGroup('groupB', gorilla1, gorilla2 )
 
@@ -81,7 +83,7 @@ function love.update(dt)
 	-- If a banana has been thrown, attempt to move it
 	for i,banana in ipairs(bananas) do
 
-		banana:move(banana.velocity.x*dt, banana.velocity.y*dt)
+		banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 
 		--gravity!
 		banana.velocity.y = banana.velocity.y + ( dt * 80 )
@@ -94,20 +96,20 @@ function love.update(dt)
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
-		player1.angle = player1.angle + 25 * dt
+		currentPlayer.angle = currentPlayer.angle + 25 * dt
 	end
 
 	if love.keyboard.isDown("down") then
-		player1.angle = player1.angle - 25 * dt
+		currentPlayer.angle = currentPlayer.angle - 25 * dt
 	end
 
 	-- Power controls
 	if love.keyboard.isDown("right") then
-		player1.velocity = player1.velocity + 75 * dt
+		currentPlayer.velocity = currentPlayer.velocity + 75 * dt
 	end
 
 	if love.keyboard.isDown("left") then
-		player1.velocity = player1.velocity - 75 * dt
+		currentPlayer.velocity = currentPlayer.velocity - 75 * dt
 	end
 
 	Bananimation:update(dt)
@@ -134,8 +136,8 @@ function love.draw()
 	end
 
 	--Draw the gorillas
-	local g1x, g1y = gorilla1:center()
-	local g2x, g2y = gorilla2:center()
+	local g1x, g1y = player1.gorilla:center()
+	local g2x, g2y = player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.draw(gorillaImage, g1x - 15 , g1y - 15 )
 	love.graphics.draw(gorillaImage, g2x - 15 , g2y - 15 )
@@ -163,9 +165,9 @@ function love.draw()
 
 	-- draw player fields
 	love.graphics.setColor(255,255,255,255)
-	love.graphics.print("Player 1", 0, 0)
-	love.graphics.print(string.format("Angle: %s", player1.angle), 0, 20)
-	love.graphics.print(string.format("Power: %s", player1.velocity), 0, 40)
+	love.graphics.print(currentPlayer.name, currentPlayer.inputsX, currentPlayer.inputsY)
+	love.graphics.print(string.format("Angle: %s", currentPlayer.angle), currentPlayer.inputsX, currentPlayer.inputsY + 20 )
+	love.graphics.print(string.format("Power: %s", currentPlayer.velocity), currentPlayer.inputsX, currentPlayer.inputsY + 40)
 
 	-- Draw score field
 	love.graphics.setColor(0,0,255,255)
@@ -178,7 +180,7 @@ end
 function love.keyreleased(key)
 	-- Fire a test banana on spacebar
 	if key == " " then
-		fireBanana(gorilla1)
+		fireBanana()
 	end
 
 	-- Quit the game on escape
@@ -187,13 +189,13 @@ function love.keyreleased(key)
 	end
 end
 
-function fireBanana(thrownBy)
-	local gx, gy = gorilla1:center()
+function fireBanana()
+	local gx, gy = currentPlayer.gorilla:center()
 	local banana = Collider:addRectangle(gx , gy , 7, 7)
 
 	--banana angle (in radians) and initial impuls velocity
-	banana.angle = player1.angle*(math.pi/180)
-	banana.impulse = player1.velocity
+	banana.angle = currentPlayer.angle*(math.pi/180)
+	banana.impulse = currentPlayer.velocity
 
 	--calc velocity for x and y vectors
 	banana.velocity = { }
@@ -201,7 +203,7 @@ function fireBanana(thrownBy)
 	banana.velocity.y = banana.impulse * math.sin(banana.angle) * -1
 
 	--setup other banana vars
-	banana.thrownBy = thrownBy
+	banana.thrownBy = currentPlayer.gorilla
 	banana.typeOf = 'banana'
 	banana.inExplosion = false
 
@@ -276,14 +278,17 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		--Add explosion to the explosions table
 		table.insert(explosions, explosion)
 
+		--Change turns
+		if currentPlayer == player1 then
+			currentPlayer = player2
+		elseif currentPlayer == player2 then
+			currentPlayer = player1
+		end
+
 	--Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
 		if banana.thrownBy ~= other then
-			if banana.thrownBy == gorilla1 then
-				player1.score = player1.score + 1
-			elseif banana.thrownBy == gorilla2 then
-				player2.score = player2.score + 1
-			end
+			currentPlayer.score = currentPlayer.score + 1
 			-- debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			banana.velocity = { x = 0, y = 0}
 			Collider:remove(banana)
