@@ -277,6 +277,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	end
 end
 
+-------------------------------------
+-- Flip the value of the global currentPlayer variable
+-- @method changeTurn
+-------------------------------------
 function changeTurn()
 	if currentPlayer == player1 then
 		currentPlayer = player2
