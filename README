@@ -1,9 +1,8 @@
 QBasic Gorillas Clone Re-Implemented With Love2D
 
 TODO -
-	* Smooth out explosion on explosion action
 	* Add sounds!
 	* Add explosion animation
-	* Add victory condition when one gorillas score is >2
-	* Gorilla animations on throw/victory
-	* Menu screen or state
+	* Smooth out explosion on explosion action
+	* Gorilla animations on throw and victory
+	* Menu screen for setting name and gravity for each player
