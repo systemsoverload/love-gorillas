@@ -8,8 +8,8 @@ function love.load()
 	Collider = HC(100, on_collide, on_stopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 
-	player1 = { angle = 0, velocity = 0 }
-	player2 = { angle = 0, velocity = 0 }
+	player1 = { angle = 0, velocity = 0, score = 0 }
+	player2 = { angle = 0, velocity = 0, score = 0 }
 
 	--Setup building images and prep for randomization
 	local buildingRedImage = love.graphics.newImage("/images/building_red.png")
@@ -166,6 +166,13 @@ function love.draw()
 	love.graphics.print("Player 1", 0, 0)
 	love.graphics.print(string.format("Angle: %s", player1.angle), 0, 20)
 	love.graphics.print(string.format("Power: %s", player1.velocity), 0, 40)
+
+	-- Draw score field
+	love.graphics.setColor(0,0,255,255)
+	love.graphics.rectangle( 'fill', 350, 575, 97, 15 )
+	love.graphics.setColor(255,255,255,255)
+	love.graphics.print(string.format("%s > Score < %s", player1.score, player2.score ), 355, 576)
+
 end
 
 function love.keyreleased(key)
@@ -272,12 +279,17 @@ function on_collide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	--Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
 		if banana.thrownBy ~= other then
+			if banana.thrownBy == gorilla1 then
+				player1.score = player1.score + 1
+			elseif banana.thrownBy == gorilla2 then
+				player2.score = player2.score + 1
+			end
 			-- debugText[#debugText+1] = string.format("Banana Colliding With GORILLA - (%s,%s)", mtv_x, mtv_y)
 			banana.velocity = { x = 0, y = 0}
+			Collider:remove(banana)
 			table.remove(bananas, 1)
 		end
 	elseif other.typeOf == 'sun' then
 		other.wasHit = true
 	end
-
 end
