@@ -131,9 +131,16 @@ function love.draw()
 		love.graphics.setColor(0, 0, 0, 255)
 		love.graphics.rectangle('fill', 0, 0, 800, 600)
 		love.graphics.setColor(255,255,255,255)
-		love.graphics.print('GAME OVER!!', 360, 300)
-		love.graphics.print(string.format("%s Score - %s", player1.name, player1.score), 360, 315)
-		love.graphics.print(string.format("%s Score - %s", player2.name, player2.score), 360, 330)
+		love.graphics.print('GAME OVER!', 320, 300)
+		love.graphics.print(string.format("%s Score - %s", player1.name, player1.score), 320, 315)
+		love.graphics.print(string.format("%s Score - %s", player2.name, player2.score), 320, 330)
+		local winner
+		if player1.score > player2.score then
+			winner = player1
+		else
+			winner = player2
+		end
+		love.graphics.print(string.format("%s wins!", winner.name, 320, 345))
 	end
 
 end
@@ -245,48 +252,50 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	if other.typeOf == 'explosion' then
 		banana.inExplosion = true
 		return
-	--Building collision handler
+	-- Building collision handler
 	elseif other.typeOf == 'building' and banana.inExplosion == false then
 
-		--Destroy the banana and remove it from collider objects
+		-- Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
 		Collider:remove(banana)
 
-		--Create explosion object
+		-- Create explosion object
 		local ex, ey = banana:center()
 		local explosion = Collider:addCircle(ex, ey, 10)
 		Collider:addToGroup( 'groupB', explosion )
 		explosion.typeOf = 'explosion'
 
-		--Add explosion to the explosions table
+		-- Add explosion to the explosions table
 		table.insert(explosions, explosion)
 
-		--Change turns
+		-- Change turns
 		changeTurn()
 
-	--Gorilla collision handler
+	-- Gorilla collision handler
 	elseif other.typeOf == 'gorilla' then
+		-- Make sure this isnt the banana colliding with the thrower
 		if banana.thrownBy ~= other then
-			--give a point to the thrower
+			-- Remove banana from the screen
+			Collider:remove(banana)
+			table.remove(bananas, 1)
+
+			-- Give a point to the thrower
 			currentPlayer.score = currentPlayer.score + 1
-			--if the currentPlayer has scored 3, game over man
+			-- If the currentPlayer has scored 3, game over man
 			if currentPlayer.score == 3 then
 				gameOver = true
 			end
 
-			Collider:remove(banana)
-			table.remove(bananas, 1)
-
-			--Clear any collision objects from the previous level
+			-- Clear any collision objects from the previous level
 			cleanupObjects()
-			--Generate new level
+			-- Generate new level
 			generateLevel()
 			-- Change turns
 			changeTurn()
 
 		end
 	elseif other.typeOf == 'sun' then
-		--Set the wasHit flag on the sun to change to the oh-face
+		-- Set the wasHit flag on the sun to change to the oh-face
 		other.wasHit = true
 	end
 end
@@ -301,7 +310,7 @@ function changeTurn()
 	elseif currentPlayer == player2 then
 		currentPlayer = player1
 	end
-	--Clear the oh-face off of the sun
+	-- Clear the oh-face off of the sun
 	sun.wasHit = false
 end
 
@@ -310,7 +319,7 @@ end
 -- @method generateLevel
 -------------------------------------
 function generateLevel()
-	--Generate random buildings
+	-- Generate random buildings
 	for i=0,9 do
 		local height =  math.random(40, 250)
 		local buildingX = i * 80 - 1
@@ -334,8 +343,8 @@ function generateLevel()
 		table.insert(buildings, building)
 	end
 
-	--Grab random buildings from the table
-	--Gorilla1 is constrained to the left half of the screen, and gorilla2 the right
+	-- Grab random buildings from the table
+	-- Player1 is constrained to the left half of the screen, and Player2 the right
 	gorilla1Building = buildings[math.random(5)]
 	gorilla2Building = buildings[math.random(5) + 5]
 
@@ -360,19 +369,14 @@ function cleanupObjects()
 	player2.angle = 0
 	player1.velocity = 0
 
-	-- Remove collision objects for buildings
-	for i,v in ipairs(buildings) do
-		Collider:remove(v)
+	-- Iterate buildings and explosions and remove them and their collision entities
+	local collisionObjects = { buildings, explosions }
+	for i in pairs(collisionObjects) do
+		for k,v in ipairs(collisionObjects[i]) do
+			Collider:remove(v)
+			collisionObjects[i][k] = nil
+		end
 	end
-	-- Empty out buildings table
-	buildings = {}
-
-	-- Remove collision objects for explosions
-	for i,v in ipairs(explosions) do
-		Collider:remove(v)
-	end
-	-- Empty out explosions table
-	explosions = {}
 
 	-- Remove collision entities for both gorillas and any stray bananas
 	Collider:remove( player1.gorilla, player2.gorilla, banana )
