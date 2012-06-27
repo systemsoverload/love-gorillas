@@ -5,7 +5,7 @@ function love.load()
 
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
-
+	gameOver = false
 	player1 = { angle = 0, velocity = 0, score = 0, name = 'Player 1' , inputsX = 5, inputsY = 5 }
 	player2 = { angle = 0, velocity = 0, score = 0, name = 'Player 2' , inputsX = 720, inputsY = 5 }
 
@@ -126,6 +126,15 @@ function love.draw()
 	love.graphics.rectangle( 'fill', 350, 575, 97, 15 )
 	love.graphics.setColor(255,255,255,255)
 	love.graphics.print(string.format("%s > Score < %s", player1.score, player2.score ), 355, 576)
+
+	if gameOver then
+		love.graphics.setColor(0, 0, 0, 255)
+		love.graphics.rectangle('fill', 0, 0, 800, 600)
+		love.graphics.setColor(255,255,255,255)
+		love.graphics.print('GAME OVER!!', 360, 300)
+		love.graphics.print(string.format("%s Score - %s", player1.name, player1.score), 360, 315)
+		love.graphics.print(string.format("%s Score - %s", player2.name, player2.score), 360, 330)
+	end
 
 end
 
@@ -260,6 +269,11 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		if banana.thrownBy ~= other then
 			--give a point to the thrower
 			currentPlayer.score = currentPlayer.score + 1
+			--if the currentPlayer has scored 3, game over man
+			if currentPlayer.score == 3 then
+				gameOver = true
+			end
+
 			Collider:remove(banana)
 			table.remove(bananas, 1)
 
@@ -268,7 +282,7 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			--Generate new level
 			generateLevel()
 			-- Change turns
-			changeTurns()
+			changeTurn()
 
 		end
 	elseif other.typeOf == 'sun' then
@@ -340,16 +354,26 @@ end
 -- @method cleanupObjects
 -------------------------------------
 function cleanupObjects()
+	-- Reset both players angles and velocity
+	player1.angle = 0
+	player1.velocity = 0
+	player2.angle = 0
+	player1.velocity = 0
 
+	-- Remove collision objects for buildings
 	for i,v in ipairs(buildings) do
 		Collider:remove(v)
 	end
+	-- Empty out buildings table
 	buildings = {}
 
-	for i,v in ipairs(buildings) do
+	-- Remove collision objects for explosions
+	for i,v in ipairs(explosions) do
 		Collider:remove(v)
 	end
+	-- Empty out explosions table
 	explosions = {}
 
+	-- Remove collision entities for both gorillas and any stray bananas
 	Collider:remove( player1.gorilla, player2.gorilla, banana )
 end
