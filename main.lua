@@ -49,6 +49,10 @@ function love.update(dt)
 		local bx,by = banana:center()
 		if bx > 800 or bx < 0 then
 			changeTurn()
+			-- Destroy the banana and remove it from collider objects
+			table.remove(bananas, 1)
+			Collider:remove(banana)
+
 		else
 			banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
 			-- gravity!
@@ -203,11 +207,11 @@ function fireBanana()
 	banana.typeOf = 'banana'
 	banana.inExplosion = false
 
-	if #bananas > 0 then
-		table.remove(bananas, 1)
+	if #bananas == 0 then
+		table.insert(bananas, banana)
 	end
 
-	table.insert(bananas, banana)
+
 end
 
 -------------------------------------
@@ -277,7 +281,6 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		return
 	-- Building collision handler
 	elseif other.typeOf == 'building' and banana.inExplosion == false then
-
 		-- Create explosion object
 		local ex, ey = banana:center()
 		local explosion = Collider:addCircle(ex, ey, 10)
@@ -287,6 +290,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		-- Add explosion to the explosions table
 		table.insert(explosions, explosion)
 
+		-- Destroy the banana and remove it from collider objects
+		table.remove(bananas, 1)
+		Collider:remove(banana)
+
 		-- Change turns
 		changeTurn()
 
@@ -294,6 +301,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	elseif other.typeOf == 'gorilla' then
 		-- Make sure this isnt the banana colliding with the thrower
 		if banana.thrownBy ~= other then
+
+			-- Destroy the banana and remove it from collider objects
+			table.remove(bananas, 1)
+			Collider:remove(banana)
 
 			-- Give a point to the thrower
 			currentPlayer.score = currentPlayer.score + 1
@@ -321,9 +332,6 @@ end
 -- @method changeTurn
 -------------------------------------
 function changeTurn()
-	-- Destroy the banana and remove it from collider objects
-	table.remove(bananas, 1)
-	Collider:remove(banana)
 
 	if currentPlayer == player1 then
 		currentPlayer = player2
