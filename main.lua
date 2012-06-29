@@ -19,7 +19,7 @@ function love.load()
 		, inputsX = 5
 		, inputsY = 5
 		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), .15)
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15)
 	}
 	player2 = {
 		angle = 0
@@ -29,7 +29,7 @@ function love.load()
 		, inputsX = 720
 		, inputsY = 5
 		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), .15)
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15)
 	}
 
 	currentPlayer = player1
@@ -120,7 +120,7 @@ function love.update(dt)
 		if currentPlayer == player1 then
 			currentPlayer.gorillaAnimation:gotoFrame(2)
 		else
-			currentPlayer.gorillaAnimation:gotoFrame(3)
+			currentPlayer.gorillaAnimation:gotoFrame(4)
 		end
 		currentPlayer.isThrowing = currentPlayer.isThrowing - dt
 	elseif currentPlayer.victoryDance == nil then
