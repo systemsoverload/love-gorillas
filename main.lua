@@ -127,6 +127,12 @@ function love.update(dt)
 		currentPlayer.gorillaAnimation:gotoFrame(1)
 	end
 
+	player1.gorillaAnimation:pause()
+	player1.gorillaAnimation:update()
+	player2.gorillaAnimation:pause()
+	player2.gorillaAnimation:update()
+
+
 	Bananimation:update(dt)
 	Collider:update(dt)
 end
@@ -224,7 +230,7 @@ function fireBanana()
 
 	if currentPlayer == player2 then
 		angle = 180 - currentPlayer.angle
-		gx = gx + 15
+		gx = gx + 7
 		gy = gy - 15
 	else
 		angle = currentPlayer.angle
