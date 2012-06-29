@@ -274,7 +274,7 @@ function fireBanana()
 	banana.entityType = 'banana'
 	banana.inExplosion = false
 
-	if #bananas == 0 then
+	if #bananas == 0 and player1.victoryDance == nil and player2.victoryDance == nil then
 		currentPlayer.isThrowing = .25
 		table.insert(bananas, banana)
 	end
