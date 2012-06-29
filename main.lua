@@ -6,8 +6,31 @@ function love.load()
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 	gameOver = false
-	player1 = { angle = 0, velocity = 0, score = 0, name = 'Player 1' , inputsX = 5, inputsY = 5 }
-	player2 = { angle = 0, velocity = 0, score = 0, name = 'Player 2' , inputsX = 720, inputsY = 5 }
+
+	--Load gorilla assets
+	gorillaImage = love.graphics.newImage("/images/gorilla.png")
+	GorillaGrid = anim8.newGrid( 28, 30, gorillaImage:getWidth(), gorillaImage:getHeight())
+
+	player1 = {
+		angle = 0
+		, velocity = 0
+		, score = 0
+		, name = 'Player 1'
+		, inputsX = 5
+		, inputsY = 5
+		, isThrowing = 0
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), 0.1)
+	}
+	player2 = {
+		angle = 0
+		, velocity = 0
+		, score = 0
+		, name = 'Player 2'
+		, inputsX = 720
+		, inputsY = 5
+		, isThrowing = 0
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), 0.1)
+	}
 
 	currentPlayer = player1
 
@@ -34,10 +57,9 @@ function love.load()
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
 	sunHitImage = love.graphics.newImage("/images/sunHit.png")
-	gorillaImage = love.graphics.newImage("/images/gorilla_stand.png")
 	bananaImage = love.graphics.newImage("/images/banana.png")
 
-	--Setup banana animations
+	--Setup animations
 	bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
 	Bananimation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
 end
@@ -62,6 +84,7 @@ function love.update(dt)
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
+		-- Ceiling the angle input at 360
 		if currentPlayer.angle + 25 * dt > 360 then
 			currentPlayer.angle = 360
 		else
@@ -70,6 +93,7 @@ function love.update(dt)
 	end
 
 	if love.keyboard.isDown("down") then
+		-- Floor the angle input at 0
 		if currentPlayer.angle - 25 * dt < 0 then
 			currentPlayer.angle = 0
 		else
@@ -83,11 +107,24 @@ function love.update(dt)
 	end
 
 	if love.keyboard.isDown("left") then
+		-- Floor the velocity input at 0
 		if currentPlayer.velocity - 75 * dt < 0 then
 			currentPlayer.velocity = 0
 		else
 			currentPlayer.velocity = currentPlayer.velocity - 75 * dt
 		end
+	end
+
+	if  currentPlayer.isThrowing > 0 then
+		-- Throw from the correct arm depending on which gorilla is currentPlayer
+		if currentPlayer == player1 then
+			currentPlayer.gorillaAnimation:gotoFrame(2)
+		else
+			currentPlayer.gorillaAnimation:gotoFrame(3)
+		end
+		currentPlayer.isThrowing = currentPlayer.isThrowing - dt
+	else
+		currentPlayer.gorillaAnimation:gotoFrame(1)
 	end
 
 	Bananimation:update(dt)
@@ -117,8 +154,8 @@ function love.draw()
 	local g1x, g1y = player1.gorilla:center()
 	local g2x, g2y = player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
-	love.graphics.draw(gorillaImage, g1x - 15 , g1y - 15 )
-	love.graphics.draw(gorillaImage, g2x - 15 , g2y - 15 )
+	player1.gorillaAnimation:draw(gorillaImage, g1x - 15, g1y - 15)
+	player2.gorillaAnimation:draw(gorillaImage, g2x - 15, g2y - 15)
 
 	--Draw bananas
 	for i,banana in ipairs(bananas) do
@@ -183,14 +220,20 @@ end
 -------------------------------------
 function fireBanana()
 	local gx, gy = currentPlayer.gorilla:center()
-	local banana = Collider:addRectangle(gx , gy , 7, 7)
 	local angle
 
 	if currentPlayer == player2 then
 		angle = 180 - currentPlayer.angle
+		gx = gx + 15
+		gy = gy - 15
 	else
 		angle = currentPlayer.angle
+		gx = gx - 15
+		gy = gy - 15
 	end
+
+
+	local banana = Collider:addRectangle(gx, gy, 7, 7)
 
 	--banana angle (in radians) and initial impuls velocity
 	banana.angle = angle * (math.pi/180)
@@ -208,6 +251,7 @@ function fireBanana()
 	banana.inExplosion = false
 
 	if #bananas == 0 then
+		currentPlayer.isThrowing = .25
 		table.insert(bananas, banana)
 	end
 
