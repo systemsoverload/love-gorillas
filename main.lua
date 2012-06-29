@@ -19,7 +19,7 @@ function love.load()
 		, inputsX = 5
 		, inputsY = 5
 		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), 0.1)
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), .15)
 	}
 	player2 = {
 		angle = 0
@@ -29,7 +29,7 @@ function love.load()
 		, inputsX = 720
 		, inputsY = 5
 		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), 0.1)
+		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-3,1'), .15)
 	}
 
 	currentPlayer = player1
@@ -123,17 +123,35 @@ function love.update(dt)
 			currentPlayer.gorillaAnimation:gotoFrame(3)
 		end
 		currentPlayer.isThrowing = currentPlayer.isThrowing - dt
-	else
+	elseif currentPlayer.victoryDance == nil then
 		currentPlayer.gorillaAnimation:gotoFrame(1)
 	end
 
-	player1.gorillaAnimation:pause()
-	player1.gorillaAnimation:update()
-	player2.gorillaAnimation:pause()
-	player2.gorillaAnimation:update()
+	if currentPlayer.victoryDance then
+		if currentPlayer.victoryDance > 0 then
+			currentPlayer.gorillaAnimation:resume()
+			currentPlayer.victoryDance = currentPlayer.victoryDance - dt
+		else
+			currentPlayer.victoryDance = nil
+			currentPlayer.gorillaAnimation:gotoFrame(1)
+			-- Clear any collision objects from the previous level
+			cleanupObjects()
+			-- Generate new level
+			generateLevel()
+			-- Change turns
+			changeTurn()
+		end
+	else
+		player1.gorillaAnimation:pause()
+		player2.gorillaAnimation:pause()
+	end
 
-
+	-- Update animations
+	player1.gorillaAnimation:update(dt)
+	player2.gorillaAnimation:update(dt)
 	Bananimation:update(dt)
+
+	-- Update HC entities
 	Collider:update(dt)
 end
 
@@ -358,17 +376,14 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 
 			-- Give a point to the thrower
 			currentPlayer.score = currentPlayer.score + 1
+
+			--Set victory dance flag
+			currentPlayer.victoryDance = 3
+
 			-- If the currentPlayer has scored 3, game over man
 			if currentPlayer.score == 3 then
 				gameOver = true
 			end
-
-			-- Clear any collision objects from the previous level
-			cleanupObjects()
-			-- Generate new level
-			generateLevel()
-			-- Change turns
-			changeTurn()
 
 		end
 	elseif other.entityType == 'sun' then
