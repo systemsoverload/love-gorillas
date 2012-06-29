@@ -29,7 +29,7 @@ function love.load()
 
 	-- Instantiate sun
 	sun = Collider:addRectangle(400, 25, 41, 31)
-	sun.typeOf = 'sun'
+	sun.entityType = 'sun'
 
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
@@ -177,7 +177,7 @@ function love.keyreleased(key)
 	end
 end
 
--------------------------------------
+---
 -- Spawn a banana and start it moving along a given angle at a given speed
 -- @method fireBanana
 -------------------------------------
@@ -204,7 +204,7 @@ function fireBanana()
 
 	--setup other banana vars
 	banana.thrownBy = currentPlayer.gorilla
-	banana.typeOf = 'banana'
+	banana.entityType = 'banana'
 	banana.inExplosion = false
 
 	if #bananas == 0 then
@@ -214,7 +214,7 @@ function fireBanana()
 
 end
 
--------------------------------------
+---
 -- Method to be called when two HC objects stop colliding
 -- @method onStopCollision
 -- @param dt - delta
@@ -228,17 +228,17 @@ function onStopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	local banana
 
 	--Figure out which collision object is our banana, pass if neither
-	if shape_a.typeOf == 'banana' then
+	if shape_a.entityType == 'banana' then
 		banana = shape_a
 		other = shape_b
-	elseif shape_b.typeOf == 'banana' then
+	elseif shape_b.entityType == 'banana' then
 		banana = shape_b
 		other = shape_a
 	else
 		return
 	end
 
-	if other.typeOf == 'explosion' then
+	if other.entityType == 'explosion' then
 		local intersectsExplosion = false
 		for i,v in ipairs(explosions) do
 			if v:contains(banana:center()) then
@@ -251,7 +251,7 @@ function onStopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	end
 end
 
--------------------------------------
+---
 -- Method to be called when two HC objects start colliding
 -- @method onCollide
 -- @param dt - delta
@@ -265,10 +265,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	local banana
 
 	--Figure out which collision object is our banana, pass if neither
-	if shape_a.typeOf == 'banana' then
+	if shape_a.entityType == 'banana' then
 		banana = shape_a
 		other = shape_b
-	elseif shape_b.typeOf == 'banana' then
+	elseif shape_b.entityType == 'banana' then
 		banana = shape_b
 		other = shape_a
 	else
@@ -276,16 +276,16 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	end
 
 	--Explosion collision handler
-	if other.typeOf == 'explosion' then
+	if other.entityType == 'explosion' then
 		banana.inExplosion = true
 		return
 	-- Building collision handler
-	elseif other.typeOf == 'building' and banana.inExplosion == false then
+	elseif other.entityType == 'building' and banana.inExplosion == false then
 		-- Create explosion object
 		local ex, ey = banana:center()
 		local explosion = Collider:addCircle(ex, ey, 10)
 		Collider:addToGroup( 'groupB', explosion )
-		explosion.typeOf = 'explosion'
+		explosion.entityType = 'explosion'
 
 		-- Add explosion to the explosions table
 		table.insert(explosions, explosion)
@@ -298,7 +298,7 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		changeTurn()
 
 	-- Gorilla collision handler
-	elseif other.typeOf == 'gorilla' then
+	elseif other.entityType == 'gorilla' then
 		-- Make sure this isnt the banana colliding with the thrower
 		if banana.thrownBy ~= other then
 
@@ -321,13 +321,13 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			changeTurn()
 
 		end
-	elseif other.typeOf == 'sun' then
+	elseif other.entityType == 'sun' then
 		-- Set the wasHit flag on the sun to change to the oh-face
 		other.wasHit = true
 	end
 end
 
--------------------------------------
+---
 -- Flip the value of the global currentPlayer variable
 -- @method changeTurn
 -------------------------------------
@@ -342,7 +342,7 @@ function changeTurn()
 	sun.wasHit = false
 end
 
--------------------------------------
+---
 -- Generate random buildings and place gorillas randomly on top of them
 -- @method generateLevel
 -------------------------------------
@@ -358,7 +358,7 @@ function generateLevel()
 		Collider:addToGroup('groupB',building)
 		building.x = buildingX
 		building.y = buildingY
-		building.typeOf = 'building'
+		building.entityType = 'building'
 		building.image = buildingImage
 		building.quad = love.graphics.newQuad(
 			0 --Starting x
@@ -378,15 +378,15 @@ function generateLevel()
 
 	-- Instantiate gorillas
 	player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
-	player1.gorilla.typeOf = 'gorilla'
+	player1.gorilla.entityType = 'gorilla'
 
 	player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
-	player2.gorilla.typeOf = 'gorilla'
+	player2.gorilla.entityType = 'gorilla'
 
 	Collider:addToGroup('groupB', player1.gorilla, player2.gorilla )
 end
 
--------------------------------------
+---
 -- Method to clean up any left over collision objects when re-generating levels
 -- @method cleanupObjects
 -------------------------------------
@@ -395,7 +395,7 @@ function cleanupObjects()
 	player1.angle = 0
 	player1.velocity = 0
 	player2.angle = 0
-	player1.velocity = 0
+	player2.velocity = 0
 
 	-- Iterate buildings and explosions and remove them and their collision entities
 	local collisionObjects = { buildings, explosions }
