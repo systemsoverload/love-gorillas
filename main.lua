@@ -58,6 +58,7 @@ function love.load()
 	sunImage = love.graphics.newImage("/images/sun.png")
 	sunHitImage = love.graphics.newImage("/images/sunHit.png")
 	bananaImage = love.graphics.newImage("/images/banana.png")
+	explosionImage = love.graphics.newImage("/images/explosion.png")
 
 	--Setup animations
 	bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
@@ -146,6 +147,10 @@ function love.update(dt)
 		player2.gorillaAnimation:pause()
 	end
 
+	for i,v in ipairs(explosions) do
+		v.animation:update(dt)
+	end
+
 	-- Update animations
 	player1.gorillaAnimation:update(dt)
 	player2.gorillaAnimation:update(dt)
@@ -170,8 +175,8 @@ function love.draw()
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
-		love.graphics.setColor(0,0,255)
-		v:draw("fill")
+		love.graphics.setColor(255,255,255,254)
+		v.animation:draw(explosionImage, v.x - 10 , v.y - 10)
 	end
 
 	--Draw the gorillas
@@ -354,7 +359,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		local explosion = Collider:addCircle(ex, ey, 10)
 		Collider:addToGroup( 'groupB', explosion )
 		explosion.entityType = 'explosion'
-
+		explosion.x = ex
+		explosion.y = ey
+		local explosionGrid = anim8.newGrid(20, 20, explosionImage:getWidth(), explosionImage:getHeight())
+		explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
 		-- Add explosion to the explosions table
 		table.insert(explosions, explosion)
 
