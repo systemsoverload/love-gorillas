@@ -3,12 +3,9 @@ QBasic Gorillas Clone Re-Implemented With Love2D
 TODO -
 	* Add sounds!
 	* Add explosion animation
-	* Gorilla animations on throw and victory
 	* Menu screen for setting name and gravity for each player
 	* Randomize building textures better
 
 KNOWN BUGS -
-	* Player 2's angles need to be reversed
 	* Explosions happening after banana exiting an explosion aren't colliding exactly where we want
 	* Sometimes explosions are hanging around after generating a new level
-	* Turn doesn't end if the banana is thrown off of the screen
