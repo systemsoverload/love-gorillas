@@ -173,18 +173,18 @@ function love.draw()
 		-- love.graphics.draw(buildingRedImage, v.x, v.y)
 	end
 
-	--Draw explosions
-	for i,v in ipairs(explosions) do
-		love.graphics.setColor(255,255,255,254)
-		v.animation:draw(explosionImage, v.x - 10 , v.y - 10)
-	end
-
 	--Draw the gorillas
 	local g1x, g1y = player1.gorilla:center()
 	local g2x, g2y = player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
 	player1.gorillaAnimation:draw(gorillaImage, g1x - 15, g1y - 15)
 	player2.gorillaAnimation:draw(gorillaImage, g2x - 15, g2y - 15)
+
+	--Draw explosions
+	for i,v in ipairs(explosions) do
+		love.graphics.setColor(255,255,255,254)
+		v.animation:draw(explosionImage, v.x - 10 , v.y - 10)
+	end
 
 	--Draw bananas
 	for i,banana in ipairs(bananas) do
@@ -354,17 +354,8 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		return
 	-- Building collision handler
 	elseif other.entityType == 'building' and banana.inExplosion == false then
-		-- Create explosion object
-		local ex, ey = banana:center()
-		local explosion = Collider:addCircle(ex, ey, 10)
-		Collider:addToGroup( 'groupB', explosion )
-		explosion.entityType = 'explosion'
-		explosion.x = ex
-		explosion.y = ey
-		local explosionGrid = anim8.newGrid(20, 20, explosionImage:getWidth(), explosionImage:getHeight())
-		explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
-		-- Add explosion to the explosions table
-		table.insert(explosions, explosion)
+		-- Create location on this spot
+		addExplosion(banana:center())
 
 		-- Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
@@ -377,6 +368,9 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	elseif other.entityType == 'gorilla' then
 		-- Make sure this isnt the banana colliding with the thrower
 		if banana.thrownBy ~= other then
+
+			-- Create location on the gorilla that was hit
+			addExplosion(other:center())
 
 			-- Destroy the banana and remove it from collider objects
 			table.remove(bananas, 1)
@@ -481,4 +475,17 @@ function cleanupObjects()
 
 	-- Remove collision entities for both gorillas and any stray bananas
 	Collider:remove( player1.gorilla, player2.gorilla, banana )
+end
+
+function addExplosion(x,y)
+	-- Create explosion object
+	local explosion = Collider:addCircle(x, y, 10)
+	Collider:addToGroup( 'groupB', explosion )
+	explosion.entityType = 'explosion'
+	explosion.x = x
+	explosion.y = y
+	local explosionGrid = anim8.newGrid(20, 20, explosionImage:getWidth(), explosionImage:getHeight())
+	explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
+	-- Add explosion to the explosions table
+	table.insert(explosions, explosion)
 end
