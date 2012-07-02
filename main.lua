@@ -182,7 +182,9 @@ function love.draw()
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
-		love.graphics.setColor(255,255,255,254)
+		love.graphics.setColor(0,0,255,255)
+		love.graphics.circle('fill', v.x, v.y, v.radius, 30)
+		love.graphics.setColor(255,255,255,255)
 		v.animation:draw(explosionImage, v.x - 10 , v.y - 10)
 	end
 
@@ -355,7 +357,8 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 	-- Building collision handler
 	elseif other.entityType == 'building' and banana.inExplosion == false then
 		-- Create location on this spot
-		addExplosion(banana:center())
+		local ex, ey = banana:center()
+		addExplosion( ex, ey, 10)
 
 		-- Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
@@ -370,7 +373,8 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 		if banana.thrownBy ~= other then
 
 			-- Create location on the gorilla that was hit
-			addExplosion(other:center())
+			local ex, ey = other:center()
+			addExplosion( ex, ey, 40)
 
 			-- Destroy the banana and remove it from collider objects
 			table.remove(bananas, 1)
@@ -477,13 +481,14 @@ function cleanupObjects()
 	Collider:remove( player1.gorilla, player2.gorilla, banana )
 end
 
-function addExplosion(x,y)
+function addExplosion( x, y, r )
 	-- Create explosion object
 	local explosion = Collider:addCircle(x, y, 10)
 	Collider:addToGroup( 'groupB', explosion )
 	explosion.entityType = 'explosion'
 	explosion.x = x
 	explosion.y = y
+	explosion.radius = r
 	local explosionGrid = anim8.newGrid(20, 20, explosionImage:getWidth(), explosionImage:getHeight())
 	explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
 	-- Add explosion to the explosions table
