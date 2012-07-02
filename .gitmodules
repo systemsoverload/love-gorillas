@@ -1,7 +1,6 @@
 [submodule "anim8"]
 	path = anim8
 	url = https://github.com/kikito/anim8
-
 [submodule "HardonCollider"]
 	path = HardonCollider
-	url= https://github.com/vrld/HardonCollider
+	url = https://github.com/vrld/HardonCollider.git
