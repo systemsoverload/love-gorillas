@@ -481,9 +481,16 @@ function cleanupObjects()
 	Collider:remove( player1.gorilla, player2.gorilla, banana )
 end
 
+---
+-- Add new explosion object to the scene
+-- @method addExplosion
+-- @param x - X coordinate to render collision entity and sprite
+-- @param y - Y coordinate to render collision entity and sprite
+-- @param r - radius of hit box and the "damage" circle to be rendered
+-------------------------------------
 function addExplosion( x, y, r )
 	-- Create explosion object
-	local explosion = Collider:addCircle(x, y, 10)
+	local explosion = Collider:addCircle(x, y, r)
 	Collider:addToGroup( 'groupB', explosion )
 	explosion.entityType = 'explosion'
 	explosion.x = x
