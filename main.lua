@@ -1,5 +1,9 @@
 HC = require "HardonCollider"
-anim8 = require "anim8/anim8"
+anim8 = require "anim8.anim8"
+Gorilla = require "gorilla"
+require("middleclass.middleclass")
+
+
 
 function love.load()
 
@@ -10,29 +14,10 @@ function love.load()
 	--Load gorilla assets
 	gorillaImage = love.graphics.newImage("/images/gorilla.png")
 	GorillaGrid = anim8.newGrid( 28, 30, gorillaImage:getWidth(), gorillaImage:getHeight())
+	Player1 = Gorilla:new('Player 1', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15), 5, 5, 'left' )
+	Player2 = Gorilla:new('Player 2', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15), 720, 5, 'right' )
 
-	player1 = {
-		angle = 0
-		, velocity = 0
-		, score = 0
-		, name = 'Player 1'
-		, inputsX = 5
-		, inputsY = 5
-		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15)
-	}
-	player2 = {
-		angle = 0
-		, velocity = 0
-		, score = 0
-		, name = 'Player 2'
-		, inputsX = 720
-		, inputsY = 5
-		, isThrowing = 0
-		, gorillaAnimation = anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15)
-	}
-
-	currentPlayer = player1
+	currentPlayer = Player1
 
 	--Setup building images and prep for randomization
 	local buildingRedImage = love.graphics.newImage("/images/building_red.png")
@@ -116,44 +101,13 @@ function love.update(dt)
 		end
 	end
 
-	if  currentPlayer.isThrowing > 0 then
-		-- Throw from the correct arm depending on which gorilla is currentPlayer
-		if currentPlayer == player1 then
-			currentPlayer.gorillaAnimation:gotoFrame(2)
-		else
-			currentPlayer.gorillaAnimation:gotoFrame(4)
-		end
-		currentPlayer.isThrowing = currentPlayer.isThrowing - dt
-	elseif currentPlayer.victoryDance == nil then
-		currentPlayer.gorillaAnimation:gotoFrame(1)
-	end
-
-	if currentPlayer.victoryDance then
-		if currentPlayer.victoryDance > 0 then
-			currentPlayer.gorillaAnimation:resume()
-			currentPlayer.victoryDance = currentPlayer.victoryDance - dt
-		else
-			currentPlayer.victoryDance = nil
-			currentPlayer.gorillaAnimation:gotoFrame(1)
-			-- Clear any collision objects from the previous level
-			cleanupObjects()
-			-- Generate new level
-			generateLevel()
-			-- Change turns
-			changeTurn()
-		end
-	else
-		player1.gorillaAnimation:pause()
-		player2.gorillaAnimation:pause()
-	end
-
 	for i,v in ipairs(explosions) do
 		v.animation:update(dt)
 	end
 
 	-- Update animations
-	player1.gorillaAnimation:update(dt)
-	player2.gorillaAnimation:update(dt)
+	Player1:update(dt)
+	Player2:update(dt)
 	Bananimation:update(dt)
 
 	-- Update HC entities
@@ -174,11 +128,11 @@ function love.draw()
 	end
 
 	--Draw the gorillas
-	local g1x, g1y = player1.gorilla:center()
-	local g2x, g2y = player2.gorilla:center()
+	local g1x, g1y = Player1.gorilla:center()
+	local g2x, g2y = Player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
-	player1.gorillaAnimation:draw(gorillaImage, g1x - 15, g1y - 15)
-	player2.gorillaAnimation:draw(gorillaImage, g2x - 15, g2y - 15)
+	Player1.gorillaAnimation:draw(gorillaImage, g1x - 15, g1y - 15)
+	Player2.gorillaAnimation:draw(gorillaImage, g2x - 15, g2y - 15)
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
@@ -213,20 +167,20 @@ function love.draw()
 	love.graphics.setColor(0,0,255,255)
 	love.graphics.rectangle( 'fill', 350, 575, 97, 15 )
 	love.graphics.setColor(255,255,255,255)
-	love.graphics.print(string.format("%s > Score < %s", player1.score, player2.score ), 355, 576)
+	love.graphics.print(string.format("%s > Score < %s", Player1.score, Player2.score ), 355, 576)
 
 	if gameOver then
 		love.graphics.setColor(0, 0, 0, 255)
 		love.graphics.rectangle('fill', 0, 0, 800, 600)
 		love.graphics.setColor(255,255,255,255)
 		love.graphics.print('GAME OVER!', 320, 300)
-		love.graphics.print(string.format("%s Score - %s", player1.name, player1.score), 320, 315)
-		love.graphics.print(string.format("%s Score - %s", player2.name, player2.score), 320, 330)
+		love.graphics.print(string.format("%s Score - %s", Player1.name, Player1.score), 320, 315)
+		love.graphics.print(string.format("%s Score - %s", Player2.name, Player2.score), 320, 330)
 		local winner
-		if player1.score > player2.score then
-			winner = player1
+		if Player1.score > Player2.score then
+			winner = Player1
 		else
-			winner = player2
+			winner = Player2
 		end
 		love.graphics.print(string.format("%s wins!", winner.name), 320, 345)
 	end
@@ -253,7 +207,7 @@ function fireBanana()
 	local gx, gy = currentPlayer.gorilla:center()
 	local angle
 
-	if currentPlayer == player2 then
+	if currentPlayer == Player2 then
 		angle = 180 - currentPlayer.angle
 		gx = gx + 7
 		gy = gy - 15
@@ -281,7 +235,7 @@ function fireBanana()
 	banana.entityType = 'banana'
 	banana.inExplosion = false
 
-	if #bananas == 0 and player1.victoryDance == nil and player2.victoryDance == nil then
+	if #bananas == 0 and Player1.victoryDance == nil and Player2.victoryDance == nil then
 		currentPlayer.isThrowing = .25
 		table.insert(bananas, banana)
 	end
@@ -404,10 +358,10 @@ end
 -------------------------------------
 function changeTurn()
 
-	if currentPlayer == player1 then
-		currentPlayer = player2
-	elseif currentPlayer == player2 then
-		currentPlayer = player1
+	if currentPlayer == Player1 then
+		currentPlayer = Player2
+	elseif currentPlayer == Player2 then
+		currentPlayer = Player1
 	end
 	-- Clear the oh-face off of the sun
 	sun.wasHit = false
@@ -448,13 +402,13 @@ function generateLevel()
 	gorilla2Building = buildings[math.random(5) + 5]
 
 	-- Instantiate gorillas
-	player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
-	player1.gorilla.entityType = 'gorilla'
+	Player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	Player1.gorilla.entityType = 'gorilla'
 
-	player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
-	player2.gorilla.entityType = 'gorilla'
+	Player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
+	Player2.gorilla.entityType = 'gorilla'
 
-	Collider:addToGroup('groupB', player1.gorilla, player2.gorilla )
+	Collider:addToGroup('groupB', Player1.gorilla, Player2.gorilla )
 end
 
 ---
@@ -463,10 +417,10 @@ end
 -------------------------------------
 function cleanupObjects()
 	-- Reset both players angles and velocity
-	player1.angle = 0
-	player1.velocity = 0
-	player2.angle = 0
-	player2.velocity = 0
+	Player1.angle = 0
+	Player1.velocity = 0
+	Player2.angle = 0
+	Player2.velocity = 0
 
 	-- Iterate buildings and explosions and remove them and their collision entities
 	local collisionObjects = { buildings, explosions }
@@ -478,7 +432,7 @@ function cleanupObjects()
 	end
 
 	-- Remove collision entities for both gorillas and any stray bananas
-	Collider:remove( player1.gorilla, player2.gorilla, banana )
+	Collider:remove( Player1.gorilla, Player2.gorilla, banana )
 end
 
 ---

@@ -4,3 +4,6 @@
 [submodule "HardonCollider"]
 	path = HardonCollider
 	url = https://github.com/vrld/HardonCollider.git
+[submodule "middleclass"]
+	path = middleclass
+	url = https://github.com/kikito/middleclass.git
