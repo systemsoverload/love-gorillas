@@ -131,8 +131,8 @@ function love.draw()
 	local g1x, g1y = Player1.gorilla:center()
 	local g2x, g2y = Player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
-	Player1.gorillaAnimation:draw(gorillaImage, g1x - 15, g1y - 15)
-	Player2.gorillaAnimation:draw(gorillaImage, g2x - 15, g2y - 15)
+	Player1.animation:draw(gorillaImage, g1x - 15, g1y - 15)
+	Player2.animation:draw(gorillaImage, g2x - 15, g2y - 15)
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
@@ -401,12 +401,9 @@ function generateLevel()
 	gorilla1Building = buildings[math.random(5)]
 	gorilla2Building = buildings[math.random(5) + 5]
 
-	-- Instantiate gorillas
-	Player1.gorilla = Collider:addRectangle(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
-	Player1.gorilla.entityType = 'gorilla'
-
-	Player2.gorilla = Collider:addRectangle(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
-	Player2.gorilla.entityType = 'gorilla'
+	-- Instantiate gorilla bounding boxes
+	Player1:setBB(gorilla1Building.x + 15, gorilla1Building.y - 30, 30, 30)
+	Player2:setBB(gorilla2Building.x + 15, gorilla2Building.y - 30, 30, 30)
 
 	Collider:addToGroup('groupB', Player1.gorilla, Player2.gorilla )
 end
