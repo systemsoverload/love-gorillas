@@ -1,0 +1,45 @@
+require("middleclass.middleclass")
+
+Banana = class("Banana")
+local bananaImage = love.graphics.newImage("/images/banana.png")
+local bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
+
+function Banana:initialize(x, y, width, height, thrownBy )
+	self.bb = Collider:addRectangle(x,y,height,width)
+	self.bb.thrownBy = thrownBy
+	self.bb.entityType = 'banana'
+	self.bb.inExplosion = false
+	self.entityType = 'banana'
+	self.animation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
+	self.image = bananaImage
+end
+
+-- Calculate the x and y velocity of the banana based on an angle and impulse
+function Banana:setTrajectory( angle, impulse )
+	--calc velocity for x and y vectors
+	self.velocity = { }
+	--double the impulse value so you dont have to enter such a large value
+	self.velocity.x = ( impulse * 2 ) * math.cos(angle)
+	self.velocity.y = ( impulse * 2 ) * math.sin(angle) * -1
+end
+
+function Banana:update(dt)
+	local bx,by = self.bb:center()
+	if bx > 800 or bx < 0 then
+		print('banana off screen!')
+		changeTurn()
+		-- Destroy the banana and remove it from collider objects
+		table.remove(bananas, 1)
+		Collider:remove(self.bb)
+
+	else
+		self.bb:move(self.velocity.x * dt, self.velocity.y * dt)
+
+		-- gravity!
+		self.velocity.y = self.velocity.y + ( dt * 80 )
+	end
+
+	self.animation:update(dt)
+end
+
+return Banana

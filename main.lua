@@ -1,9 +1,7 @@
 HC = require "HardonCollider"
 anim8 = require "anim8.anim8"
 Gorilla = require "gorilla"
-require("middleclass.middleclass")
-
-
+Banana = require "banana"
 
 function love.load()
 
@@ -42,31 +40,11 @@ function love.load()
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
 	sunHitImage = love.graphics.newImage("/images/sunHit.png")
-	bananaImage = love.graphics.newImage("/images/banana.png")
-	explosionImage = love.graphics.newImage("/images/explosion.png")
 
-	--Setup animations
-	bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
-	Bananimation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
+	explosionImage = love.graphics.newImage("/images/explosion.png")
 end
 
 function love.update(dt)
-	-- If a banana has been thrown, attempt to move it
-	for i,banana in ipairs(bananas) do
-		-- Move da banana!
-		local bx,by = banana:center()
-		if bx > 800 or bx < 0 then
-			changeTurn()
-			-- Destroy the banana and remove it from collider objects
-			table.remove(bananas, 1)
-			Collider:remove(banana)
-
-		else
-			banana:move(banana.velocity.x * dt, banana.velocity.y * dt)
-			-- gravity!
-			banana.velocity.y = banana.velocity.y + ( dt * 80 )
-		end
-	end
 
 	-- Angle controls
 	if love.keyboard.isDown("up") then
@@ -108,7 +86,10 @@ function love.update(dt)
 	-- Update animations
 	Player1:update(dt)
 	Player2:update(dt)
-	Bananimation:update(dt)
+
+	for i,v in ipairs(bananas) do
+		v:update(dt)
+	end
 
 	-- Update HC entities
 	Collider:update(dt)
@@ -144,9 +125,9 @@ function love.draw()
 
 	--Draw bananas
 	for i,banana in ipairs(bananas) do
-		local bx, by = banana:center()
+		local bx, by = banana.bb:center()
 		love.graphics.setColor(255,255,255,255)
-		Bananimation:draw(bananaImage, bx - 3.5, by - 3.5)
+		banana.animation:draw(banana.image, bx - 3.5, by - 3.5)
 	end
 
 	--Draw the sun
@@ -217,23 +198,10 @@ function fireBanana()
 		gy = gy - 15
 	end
 
+	local banana = Banana:new(gx, gy, 7, 7, currentPlayer.gorilla )
 
-	local banana = Collider:addRectangle(gx, gy, 7, 7)
-
-	--banana angle (in radians) and initial impuls velocity
-	banana.angle = angle * (math.pi/180)
-	banana.impulse = currentPlayer.velocity
-
-	--calc velocity for x and y vectors
-	banana.velocity = { }
-	--double the impulse value so you dont have to enter such a large value
-	banana.velocity.x = ( banana.impulse * 2 ) * math.cos(banana.angle)
-	banana.velocity.y = ( banana.impulse * 2 ) * math.sin(banana.angle) * -1
-
-	--setup other banana vars
-	banana.thrownBy = currentPlayer.gorilla
-	banana.entityType = 'banana'
-	banana.inExplosion = false
+	-- pass banana angle (in radians) and initial impulse velocity
+	banana:setTrajectory( angle * (math.pi/180), currentPlayer.velocity )
 
 	if #bananas == 0 and Player1.victoryDance == nil and Player2.victoryDance == nil then
 		currentPlayer.isThrowing = .25

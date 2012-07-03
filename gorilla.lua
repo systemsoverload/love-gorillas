@@ -2,7 +2,7 @@ require("middleclass.middleclass")
 
 Gorilla = class("Gorilla")
 
-function Gorilla:initialize(name,animation,inputsX,inputsY,orientation)
+function Gorilla:initialize( name, animation, inputsX, inputsY, orientation )
 	self.score = 0
 	self.name = name
 	self.angle = 0
