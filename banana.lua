@@ -25,8 +25,7 @@ end
 
 function Banana:update(dt)
 	local bx,by = self.bb:center()
-	if bx > 800 or bx < 0 then
-		print('banana off screen!')
+	if bx > 800 or bx < 0 or by > 600 then
 		changeTurn()
 		-- Destroy the banana and remove it from collider objects
 		table.remove(bananas, 1)
