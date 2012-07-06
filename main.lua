@@ -108,11 +108,8 @@ function love.draw()
 	end
 
 	--Draw the gorillas
-	local g1x, g1y = Player1.gorilla:center()
-	local g2x, g2y = Player2.gorilla:center()
-	love.graphics.setColor(255,255,255,255)
-	Player1.animation:draw(Player1.image, g1x - 15, g1y - 15)
-	Player2.animation:draw(Player2.image, g2x - 15, g2y - 15)
+	Player1:draw()
+	Player2:draw()
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
@@ -134,12 +131,6 @@ function love.draw()
 	else
 		love.graphics.draw(sunImage, 400, 25)
 	end
-
-	-- draw player fields
-	love.graphics.setColor(255,255,255,255)
-	love.graphics.print(currentPlayer.name, currentPlayer.inputsX, currentPlayer.inputsY)
-	love.graphics.print(string.format("Angle: %s", currentPlayer.angle), currentPlayer.inputsX, currentPlayer.inputsY + 20 )
-	love.graphics.print(string.format("Power: %s", currentPlayer.velocity), currentPlayer.inputsX, currentPlayer.inputsY + 40)
 
 	-- Draw score field
 	love.graphics.setColor(0,0,255,255)

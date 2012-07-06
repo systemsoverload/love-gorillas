@@ -34,6 +34,19 @@ function Gorilla:celebrate()
 	love.audio.play(victorySound)
 end
 
+function Gorilla:draw()
+	-- draw player fields
+	love.graphics.setColor(255,255,255,255)
+	love.graphics.print(self.name, self.inputsX, self.inputsY)
+	love.graphics.print(string.format("Angle: %s", self.angle), self.inputsX, self.inputsY + 20 )
+	love.graphics.print(string.format("Power: %s", self.velocity), self.inputsX, self.inputsY + 40)
+
+	-- draw gorilla image over the bb
+	local gx, gy = self.gorilla:center()
+	self.animation:draw(self.image, gx - 15, gy - 15)
+
+end
+
 -- Update loop
 function Gorilla:update(dt)
 
