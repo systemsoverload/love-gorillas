@@ -1,7 +1,7 @@
 QBasic Gorillas Clone Re-Implemented With Love2D
 
 TODO -
-	* Menu screen for setting name and gravity for each player
+	* Menu screen for setting name for each player and gravity
 	* Randomize building textures better
 
 KNOWN BUGS -
