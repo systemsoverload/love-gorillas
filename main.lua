@@ -172,7 +172,7 @@ end
 
 function love.keyreleased(key)
 	-- Fire a test banana on spacebar
-	if key == " " then
+	if key == " " or key == "return" or key == "kpenter" then
 		fireBanana()
 	end
 
