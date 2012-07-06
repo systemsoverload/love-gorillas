@@ -1,5 +1,3 @@
-require("middleclass.middleclass")
-
 Gorilla = class("Gorilla")
 
 function Gorilla:initialize( name, animation, inputsX, inputsY, orientation )
