@@ -9,7 +9,7 @@ function Banana:initialize(x, y, width, height, thrownBy )
 	self.bb.entityType = 'banana'
 	self.bb.inExplosion = false
 	self.entityType = 'banana'
-	self.animation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
+	self.animation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.15)
 	self.image = bananaImage
 	self.soundPlayed = false
 end
@@ -37,9 +37,9 @@ function Banana:update(dt)
 
 	else
 		-- Update banana position
-		self.bb:move(self.velocity.x * dt, self.velocity.y * dt)
+		self.bb:move( (self.velocity.x * dt) * .5 , (self.velocity.y * dt) * .5 )
 		-- gravity!
-		self.velocity.y = self.velocity.y + ( dt * 80 )
+		self.velocity.y = self.velocity.y + ( dt * 40 )
 	end
 
 	self.animation:update(dt)
