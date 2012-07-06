@@ -7,6 +7,8 @@ function love.load()
 
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
+	explosionSound = love.audio.newSource("audio/small-explosion.ogg")
+
 	gameOver = false
 
 	--Load gorilla assets
@@ -419,4 +421,5 @@ function addExplosion( x, y, r )
 	explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
 	-- Add explosion to the explosions table
 	table.insert(explosions, explosion)
+	love.audio.play(explosionSound)
 end
