@@ -3,6 +3,7 @@ require("middleclass.middleclass")
 Banana = class("Banana")
 local bananaImage = love.graphics.newImage("/images/banana.png")
 local bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
+local throwSound = love.audio.newSource("audio/throw.ogg")
 
 function Banana:initialize(x, y, width, height, thrownBy )
 	self.bb = Collider:addRectangle(x,y,height,width)
@@ -12,6 +13,7 @@ function Banana:initialize(x, y, width, height, thrownBy )
 	self.entityType = 'banana'
 	self.animation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.1)
 	self.image = bananaImage
+	self.soundPlayed = false
 end
 
 -- Calculate the x and y velocity of the banana based on an angle and impulse
@@ -24,8 +26,12 @@ function Banana:setTrajectory( angle, impulse )
 end
 
 function Banana:update(dt)
+	if self.soundPlayed == false then
+		love.audio.play(throwSound)
+		self.soundPlayed = true
+	end
 	local bx,by = self.bb:center()
-	if bx > 800 or bx < 0 then
+	if bx > 800 or bx < 0 or by > 600 then
 		print('banana off screen!')
 		changeTurn()
 		-- Destroy the banana and remove it from collider objects
@@ -33,8 +39,8 @@ function Banana:update(dt)
 		Collider:remove(self.bb)
 
 	else
+		-- Update banana position
 		self.bb:move(self.velocity.x * dt, self.velocity.y * dt)
-
 		-- gravity!
 		self.velocity.y = self.velocity.y + ( dt * 80 )
 	end
