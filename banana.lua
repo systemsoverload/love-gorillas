@@ -1,4 +1,4 @@
-Banana = class("Banana")
+local Banana = class("Banana")
 local bananaImage = love.graphics.newImage("/images/banana.png")
 local bananaGrid = anim8.newGrid(7, 7, bananaImage:getWidth(), bananaImage:getHeight())
 local throwSound = love.audio.newSource("audio/throw.ogg")

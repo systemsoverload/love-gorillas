@@ -1,4 +1,4 @@
-Explosion = class('Explosion')
+local Explosion = class('Explosion')
 
 local explosionImageSmall = love.graphics.newImage("/images/explosion.png")
 local explosionImageLarge = love.graphics.newImage("/images/explosion_large.png")

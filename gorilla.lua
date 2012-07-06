@@ -1,6 +1,8 @@
-Gorilla = class("Gorilla")
+local Gorilla = class("Gorilla")
 
-function Gorilla:initialize( name, animation, inputsX, inputsY, orientation )
+local victorySound = love.audio.newSource("audio/victory.ogg")
+
+function Gorilla:initialize( name, inputsX, inputsY, orientation )
 	self.score = 0
 	self.name = name
 	self.angle = 0
@@ -8,15 +10,28 @@ function Gorilla:initialize( name, animation, inputsX, inputsY, orientation )
 	self.isThrowing = 0
 	self.inputsX = inputsX
 	self.inputsY = inputsY
-	self.animation = animation
 	self.orientation = orientation
 	self.victoryDance = nil
+	self.image = love.graphics.newImage("/images/gorilla.png")
+	self.grid = anim8.newGrid( 28, 30, self.image:getWidth(), self.image:getHeight())
+	self.animation =  anim8.newAnimation('loop', self.grid('1-4,1'), .5)
 end
 
 -- Set the collision bounding box
 function Gorilla:setBB( x, y, height, width )
 	self.gorilla = Collider:addRectangle(x,y,height,width)
 	self.gorilla.entityType = 'gorilla'
+end
+
+function Gorilla:celebrate()
+	-- Give me a point
+	self.score = currentPlayer.score + 1
+
+	--Set victory dance flag
+	self.victoryDance = 6
+
+	--Play victory sound
+	love.audio.play(victorySound)
 end
 
 -- Update loop

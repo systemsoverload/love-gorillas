@@ -9,15 +9,12 @@ function love.load()
 
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
-	victorySound = love.audio.newSource("audio/victory.ogg")
 
 	gameOver = false
 
 	--Load gorilla assets
-	gorillaImage = love.graphics.newImage("/images/gorilla.png")
-	GorillaGrid = anim8.newGrid( 28, 30, gorillaImage:getWidth(), gorillaImage:getHeight())
-	Player1 = Gorilla:new('Player 1', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .5), 5, 5, 'left' )
-	Player2 = Gorilla:new('Player 2', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .5), 720, 5, 'right' )
+	Player1 = Gorilla:new('Player 1', 5, 5, 'left' )
+	Player2 = Gorilla:new('Player 2', 720, 5, 'right' )
 
 	currentPlayer = Player1
 
@@ -114,8 +111,8 @@ function love.draw()
 	local g1x, g1y = Player1.gorilla:center()
 	local g2x, g2y = Player2.gorilla:center()
 	love.graphics.setColor(255,255,255,255)
-	Player1.animation:draw(gorillaImage, g1x - 15, g1y - 15)
-	Player2.animation:draw(gorillaImage, g2x - 15, g2y - 15)
+	Player1.animation:draw(Player1.image, g1x - 15, g1y - 15)
+	Player2.animation:draw(Player2.image, g2x - 15, g2y - 15)
 
 	--Draw explosions
 	for i,v in ipairs(explosions) do
@@ -304,14 +301,9 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			table.remove(bananas, 1)
 			Collider:remove(banana)
 
-			-- Give a point to the thrower
-			currentPlayer.score = currentPlayer.score + 1
-
-			--Set victory dance flag
-			currentPlayer.victoryDance = 6
-
 			--Play the victory song
-			love.audio.play(victorySound)
+			currentPlayer:celebrate()
+
 			-- If the currentPlayer has scored 3, game over man
 			if currentPlayer.score == 3 then
 				gameOver = true
