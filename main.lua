@@ -187,7 +187,8 @@ function fireBanana()
 	local gx, gy = currentPlayer.gorilla:center()
 	local angle
 
-	if currentPlayer == Player2 then
+	-- Reflect angle for player on the right
+	if currentPlayer.orientation == "right" then
 		angle = 180 - currentPlayer.angle
 		gx = gx + 7
 		gy = gy - 15
