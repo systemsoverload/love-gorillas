@@ -8,14 +8,15 @@ function love.load()
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 	explosionSound = love.audio.newSource("audio/small-explosion.ogg")
+	victorySound = love.audio.newSource("audio/victory.ogg")
 
 	gameOver = false
 
 	--Load gorilla assets
 	gorillaImage = love.graphics.newImage("/images/gorilla.png")
 	GorillaGrid = anim8.newGrid( 28, 30, gorillaImage:getWidth(), gorillaImage:getHeight())
-	Player1 = Gorilla:new('Player 1', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15), 5, 5, 'left' )
-	Player2 = Gorilla:new('Player 2', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .15), 720, 5, 'right' )
+	Player1 = Gorilla:new('Player 1', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .5), 5, 5, 'left' )
+	Player2 = Gorilla:new('Player 2', anim8.newAnimation('loop', GorillaGrid('1-4,1'), .5), 720, 5, 'right' )
 
 	currentPlayer = Player1
 
@@ -308,8 +309,10 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			currentPlayer.score = currentPlayer.score + 1
 
 			--Set victory dance flag
-			currentPlayer.victoryDance = 3
+			currentPlayer.victoryDance = 7
 
+			--Play the victory song
+			love.audio.play(victorySound)
 			-- If the currentPlayer has scored 3, game over man
 			if currentPlayer.score == 3 then
 				gameOver = true
