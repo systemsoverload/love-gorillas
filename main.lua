@@ -309,7 +309,7 @@ function onCollide( dt, shape_a, shape_b, mtv_x, mtv_y )
 			currentPlayer.score = currentPlayer.score + 1
 
 			--Set victory dance flag
-			currentPlayer.victoryDance = 7
+			currentPlayer.victoryDance = 6
 
 			--Play the victory song
 			love.audio.play(victorySound)
