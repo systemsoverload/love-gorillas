@@ -1,9 +1,6 @@
 HC = require "HardonCollider"
 anim8 = require "anim8.anim8"
 
-local currentPlayer, sun, sunHitimage, gameOver
-local buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
-
 function love.load()
 	require("middleclass.middleclass")
 	Banana = require "banana"
@@ -11,6 +8,7 @@ function love.load()
 	Explosion = require "explosion"
 
 	Collider = HC(100, onCollide, onStopCollision )
+	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
 
 	gameOver = false
 
