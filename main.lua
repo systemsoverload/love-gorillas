@@ -1,15 +1,11 @@
 HC = require "HardonCollider"
 anim8 = require "anim8.anim8"
 
-local explosionImageSmall = love.graphics.newImage("/images/explosion.png")
-local explosionImageLarge = love.graphics.newImage("/images/explosion_large.png")
-local explosionSoundSmall = love.audio.newSource("audio/small-explosion.ogg")
-local explosionSoundLarge = love.audio.newSource("audio/large-explosion.ogg")
-
 function love.load()
 	require("middleclass.middleclass")
 	Banana = require "banana"
 	Gorilla = require "gorilla"
+	Explosion = require "explosion"
 
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
@@ -244,7 +240,7 @@ function onStopCollision(dt, shape_a, shape_b, mtv_x, mtv_y)
 	if other.entityType == 'explosion' then
 		local intersectsExplosion = false
 		for i,v in ipairs(explosions) do
-			if v:contains(banana:center()) then
+			if v.bb:contains(banana:center()) then
 				intersectsExplosion = true
 			end
 		end
@@ -399,7 +395,12 @@ function cleanupObjects()
 	local collisionObjects = { buildings, explosions }
 	for i in pairs(collisionObjects) do
 		for k,v in ipairs(collisionObjects[i]) do
-			Collider:remove(v)
+			-- If the object is a class, remove its bounding box property instead
+			if v.bb then
+				Collider:remove(v.bb)
+			else
+				Collider:remove(v)
+			end
 			collisionObjects[i][k] = nil
 		end
 	end
@@ -416,26 +417,6 @@ end
 -- @param r - radius of hit box and the "damage" circle to be rendered
 -------------------------------------
 function addExplosion( x, y, r )
-	-- Create explosion object
-	local explosion = Collider:addCircle(x, y, r)
-	Collider:addToGroup( 'groupB', explosion )
-	explosion.entityType = 'explosion'
-	explosion.x = x
-	explosion.y = y
-	explosion.radius = r
-
-	if r > 10 then
-		explosion.image = explosionImageLarge
-		explosion.frameSize = 40
-		love.audio.play(explosionSoundLarge)
-	else
-		explosion.image = explosionImageSmall
-		explosion.frameSize = 20
-		love.audio.play(explosionSoundSmall)
-	end
-
-	local explosionGrid = anim8.newGrid(explosion.frameSize, explosion.frameSize, explosion.image:getWidth(), explosion.image:getHeight())
-	explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
-	-- Add explosion to the explosions table
+	local explosion = Explosion:new( x, y, r )
 	table.insert(explosions, explosion)
 end
