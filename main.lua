@@ -124,9 +124,7 @@ function love.draw()
 
 	--Draw bananas
 	for i,banana in ipairs(bananas) do
-		local bx, by = banana.bb:center()
-		love.graphics.setColor(255,255,255,255)
-		banana.animation:draw(banana.image, bx - 3.5, by - 3.5)
+		banana:draw()
 	end
 
 	--Draw the sun

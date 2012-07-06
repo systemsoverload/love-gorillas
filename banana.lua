@@ -23,6 +23,12 @@ function Banana:setTrajectory( angle, impulse )
 	self.velocity.y = ( impulse * 2 ) * math.sin(angle) * -1
 end
 
+function Banana:draw()
+	local bx, by = self.bb:center()
+	love.graphics.setColor(255,255,255,255)
+	self.animation:draw(self.image, bx - 3.5, by - 3.5)
+end
+
 function Banana:update(dt)
 	if self.soundPlayed == false then
 		love.audio.play(throwSound)
