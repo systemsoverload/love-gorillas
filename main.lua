@@ -112,11 +112,8 @@ function love.draw()
 	Player2:draw()
 
 	--Draw explosions
-	for i,v in ipairs(explosions) do
-		love.graphics.setColor(0,0,255,255)
-		love.graphics.circle('fill', v.x, v.y, v.radius, 30)
-		love.graphics.setColor(255,255,255,255)
-		v.animation:draw(v.image, v.x - 10 , v.y - 10)
+	for i,explosion in ipairs(explosions) do
+		explosion:draw()
 	end
 
 	--Draw bananas

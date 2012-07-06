@@ -28,4 +28,12 @@ function Explosion:initialize(x,y,r)
 	self.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
 end
 
+function Explosion:draw()
+	love.graphics.setColor(0,0,255,255)
+	love.graphics.circle('fill', self.x, self.y, self.radius, 30)
+	love.graphics.setColor(255,255,255,255)
+	self.animation:draw( self.image, self.x - 10 , self.y - 10 )
+end
+
+
 return Explosion
