@@ -1,13 +1,18 @@
 HC = require "HardonCollider"
 anim8 = require "anim8.anim8"
-Gorilla = require "gorilla"
-Banana = require "banana"
+
+local explosionImageSmall = love.graphics.newImage("/images/explosion.png")
+local explosionImageLarge = love.graphics.newImage("/images/explosion_large.png")
+local explosionSoundSmall = love.audio.newSource("audio/small-explosion.ogg")
+local explosionSoundLarge = love.audio.newSource("audio/large-explosion.ogg")
 
 function love.load()
+	require("middleclass.middleclass")
+	Banana = require "banana"
+	Gorilla = require "gorilla"
 
 	Collider = HC(100, onCollide, onStopCollision )
 	buildings, explosions, bananas, buildingImages = {}, {}, {}, {}
-	explosionSound = love.audio.newSource("audio/small-explosion.ogg")
 	victorySound = love.audio.newSource("audio/victory.ogg")
 
 	gameOver = false
@@ -43,8 +48,6 @@ function love.load()
 	--Load image files
 	sunImage = love.graphics.newImage("/images/sun.png")
 	sunHitImage = love.graphics.newImage("/images/sunHit.png")
-
-	explosionImage = love.graphics.newImage("/images/explosion.png")
 end
 
 function love.update(dt)
@@ -123,7 +126,7 @@ function love.draw()
 		love.graphics.setColor(0,0,255,255)
 		love.graphics.circle('fill', v.x, v.y, v.radius, 30)
 		love.graphics.setColor(255,255,255,255)
-		v.animation:draw(explosionImage, v.x - 10 , v.y - 10)
+		v.animation:draw(v.image, v.x - 10 , v.y - 10)
 	end
 
 	--Draw bananas
@@ -420,9 +423,19 @@ function addExplosion( x, y, r )
 	explosion.x = x
 	explosion.y = y
 	explosion.radius = r
-	local explosionGrid = anim8.newGrid(20, 20, explosionImage:getWidth(), explosionImage:getHeight())
+
+	if r > 10 then
+		explosion.image = explosionImageLarge
+		explosion.frameSize = 40
+		love.audio.play(explosionSoundLarge)
+	else
+		explosion.image = explosionImageSmall
+		explosion.frameSize = 20
+		love.audio.play(explosionSoundSmall)
+	end
+
+	local explosionGrid = anim8.newGrid(explosion.frameSize, explosion.frameSize, explosion.image:getWidth(), explosion.image:getHeight())
 	explosion.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
 	-- Add explosion to the explosions table
 	table.insert(explosions, explosion)
-	love.audio.play(explosionSound)
 end
