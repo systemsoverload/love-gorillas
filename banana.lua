@@ -45,7 +45,7 @@ function Banana:update(dt)
 		-- Update banana position
 		self.bb:move( (self.velocity.x * dt) * .5 , (self.velocity.y * dt) * .5 )
 		-- gravity!
-		self.velocity.y = self.velocity.y + ( dt * 40 )
+		self.velocity.y = self.velocity.y + ( dt * 80 ) * .5
 	end
 
 	self.animation:update(dt)
