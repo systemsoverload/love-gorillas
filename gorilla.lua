@@ -38,9 +38,9 @@ function Gorilla:draw()
 	if self == currentPlayer then
 		-- draw player fields
 		love.graphics.setColor(255,255,255,255)
-		love.graphics.print(self.name, self.inputsX, self.inputsY)
-		love.graphics.print(string.format("Angle: %s", self.angle), self.inputsX, self.inputsY + 20 )
-		love.graphics.print(string.format("Power: %s", self.velocity), self.inputsX, self.inputsY + 40)
+		love.graphics.printf( self.name, self.inputsX, self.inputsY, 60, self.orientation )
+		love.graphics.printf(string.format("Angle: %s", self.angle), self.inputsX, self.inputsY + 20, 60, self.orientation )
+		love.graphics.printf(string.format("Power: %s", self.velocity), self.inputsX, self.inputsY + 40, 60, self.orientation)
 	end
 
 	-- draw gorilla image over the bb

@@ -14,7 +14,7 @@ function love.load()
 
 	--Load gorilla assets
 	Player1 = Gorilla:new('Player 1', 5, 5, 'left' )
-	Player2 = Gorilla:new('Player 2', 720, 5, 'right' )
+	Player2 = Gorilla:new('Player 2', 735, 5, 'right' )
 
 	currentPlayer = Player1
 
