@@ -14,7 +14,7 @@ function love.load()
 
 	--Load gorilla assets
 	Player1 = Gorilla:new('Player 1', 5, 5, 'left' )
-	Player2 = Gorilla:new('Player 2', 735, 5, 'right' )
+	Player2 = Gorilla:new('Player 2', 725, 5, 'right' )
 
 	currentPlayer = Player1
 
@@ -44,39 +44,6 @@ function love.load()
 end
 
 function love.update(dt)
-
-	-- Angle controls
-	if love.keyboard.isDown("up") then
-		-- Ceiling the angle input at 360
-		if currentPlayer.angle + 25 * dt > 360 then
-			currentPlayer.angle = 360
-		else
-			currentPlayer.angle = currentPlayer.angle + 25 * dt
-		end
-	end
-
-	if love.keyboard.isDown("down") then
-		-- Floor the angle input at 0
-		if currentPlayer.angle - 25 * dt < 0 then
-			currentPlayer.angle = 0
-		else
-			currentPlayer.angle = currentPlayer.angle - 25 * dt
-		end
-	end
-
-	-- Power controls
-	if love.keyboard.isDown("right") then
-		currentPlayer.velocity = currentPlayer.velocity + 75 * dt
-	end
-
-	if love.keyboard.isDown("left") then
-		-- Floor the velocity input at 0
-		if currentPlayer.velocity - 75 * dt < 0 then
-			currentPlayer.velocity = 0
-		else
-			currentPlayer.velocity = currentPlayer.velocity - 75 * dt
-		end
-	end
 
 	for i,v in ipairs(explosions) do
 		v.animation:update(dt)
@@ -153,48 +120,17 @@ function love.draw()
 
 end
 
-function love.keyreleased(key)
-	-- Fire a test banana on spacebar
-	if key == " " or key == "return" or key == "kpenter" then
-		fireBanana()
-	end
-
-	-- Quit the game on escape
-	if key == "escape" then
+function love.keypressed(key,unicode)
+	--Only send numbers or enter key
+	if (unicode >= 48 and unicode <= 57)
+						or key == 'return'
+						or key == 'backspace'
+						or key == 'left'
+						or key == 'right' then
+		currentPlayer:keypressed(key, unicode)
+	elseif key == "escape" then
 		love.event.push("quit")
 	end
-end
-
----
--- Spawn a banana and start it moving along a given angle at a given speed
--- @method fireBanana
--------------------------------------
-function fireBanana()
-	local gx, gy = currentPlayer.gorilla:center()
-	local angle
-
-	-- Reflect angle for player on the right
-	if currentPlayer.orientation == "right" then
-		angle = 180 - currentPlayer.angle
-		gx = gx + 7
-		gy = gy - 15
-	else
-		angle = currentPlayer.angle
-		gx = gx - 15
-		gy = gy - 15
-	end
-
-	local banana = Banana:new(gx, gy, 7, 7, currentPlayer.gorilla )
-
-	-- pass banana angle (in radians) and initial impulse velocity
-	banana:setTrajectory( angle * (math.pi/180), currentPlayer.velocity )
-
-	if #bananas == 0 and Player1.victoryDance == nil and Player2.victoryDance == nil then
-		currentPlayer.isThrowing = .25
-		table.insert(bananas, banana)
-	end
-
-
 end
 
 ---
@@ -308,7 +244,7 @@ end
 -- @method changeTurn
 -------------------------------------
 function changeTurn()
-
+	currentPlayer.isThrowing = 0
 	if currentPlayer == Player1 then
 		currentPlayer = Player2
 	elseif currentPlayer == Player2 then
