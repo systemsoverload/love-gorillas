@@ -1,6 +1,10 @@
 HC = require "HardonCollider"
 anim8 = require "anim8.anim8"
-
+game = {}
+game.width = 800
+game.height = 400
+love.graphics.setMode(game.width, game.height, true, false, 8)
+love.mouse.setVisible( false )
 function love.load()
 	require("middleclass.middleclass")
 	Banana = require "banana"
@@ -14,7 +18,7 @@ function love.load()
 
 	--Load gorilla assets
 	Player1 = Gorilla:new('Player 1', 5, 5, 'left' )
-	Player2 = Gorilla:new('Player 2', 725, 5, 'right' )
+	Player2 = Gorilla:new('Player 2', game.width - 75, 5, 'right' )
 
 	currentPlayer = Player1
 
@@ -98,17 +102,58 @@ function love.draw()
 
 	-- Draw score field
 	love.graphics.setColor(0,0,255,255)
-	love.graphics.rectangle( 'fill', 350, 575, 97, 15 )
+	love.graphics.rectangle(
+		'fill'
+		, game.width / 2 - 50
+		, game.height - 25
+		, 97
+		, 15
+	)
 	love.graphics.setColor(255,255,255,255)
-	love.graphics.print(string.format("%s > Score < %s", Player1.score, Player2.score ), 355, 576)
+	love.graphics.print(
+		string.format(
+			"%s > Score < %s"
+			, Player1.score
+			, Player2.score
+		)
+		, game.width / 2 - 45
+		, game.height - 24
+	)
 
-	if gameOver then
+	if gameOver and currentPlayer.victoryDance == nil then
 		love.graphics.setColor(0, 0, 0, 255)
-		love.graphics.rectangle('fill', 0, 0, 800, 600)
+
+		love.graphics.rectangle(
+			'fill'
+			, 0
+			, 0
+			, game.width
+			, game.height
+		)
+
 		love.graphics.setColor(255,255,255,255)
 		love.graphics.print('GAME OVER!', 320, 300)
-		love.graphics.print(string.format("%s Score - %s", Player1.name, Player1.score), 320, 315)
-		love.graphics.print(string.format("%s Score - %s", Player2.name, Player2.score), 320, 330)
+
+		love.graphics.print(
+			string.format(
+				"%s Score - %s"
+				, Player1.name
+				, Player1.score
+			)
+			, game.width / 2 - 80
+			, game.height / 2 + 15
+		)
+
+		love.graphics.print(
+			string.format(
+				"%s Score - %s"
+				, Player2.name
+				, Player2.score
+			)
+			, game.width / 2 - 80
+			, game.height / 2 + 70
+		)
+
 		local winner
 		if Player1.score > Player2.score then
 			winner = Player1
@@ -261,12 +306,12 @@ end
 function generateLevel()
 	-- Generate random buildings
 	for i=0,9 do
-		local height =  math.random(40, 250)
-		local buildingX = i * 80 - 1
-		local buildingY = 600 - height
+		local buildingHeight =  math.random( game.width * 0.10, game.height * 0.70 )
+		local buildingX = i * (game.width / 10) - 1
+		local buildingY = game.height - buildingHeight
 		local buildingImage = buildingImages[math.random( 3 )]
-		building = Collider:addRectangle( buildingX, buildingY, 78, height)
-		building.height = height
+		building = Collider:addRectangle( buildingX, buildingY, game.width * 0.10 , buildingHeight)
+		building.height = buildingHeight
 		Collider:addToGroup('groupB',building)
 		building.x = buildingX
 		building.y = buildingY
@@ -275,8 +320,8 @@ function generateLevel()
 		building.quad = love.graphics.newQuad(
 			0 --Starting x
 			, 0 --Starting y
-			, 79 --Quad width
-			, height --Quad Height
+			, game.width * 0.10 - 1 --Quad width
+			, buildingHeight --Quad Height
 			, buildingImage:getWidth() --Image width
 			, buildingImage:getHeight() --Image height
 		)
