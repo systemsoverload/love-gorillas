@@ -15,7 +15,7 @@ function Gorilla:initialize( name, inputsX, inputsY, orientation )
 	self.victoryDance = nil
 	self.image = love.graphics.newImage("/images/gorilla.png")
 	self.grid = anim8.newGrid( 28, 30, self.image:getWidth(), self.image:getHeight())
-	self.animation =  anim8.newAnimation('loop', self.grid('1-4,1'), .5)
+	self.animation =  anim8.newAnimation(self.grid('1-4', 1), 0.5)
 	self.inputState = "angle"
 
 	if self.orientation == 'left' then
