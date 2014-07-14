@@ -3,7 +3,7 @@ anim8 = require "anim8.anim8"
 game = {}
 game.width = 800
 game.height = 400
-love.graphics.setMode(game.width, game.height, true, false, 8)
+love.window.setMode(game.width, game.height, {fullscreen=true, vsync=false, fsaa=8})
 love.mouse.setVisible( false )
 function love.load()
 	require("middleclass.middleclass")
@@ -74,7 +74,7 @@ function love.draw()
 	for i,v in ipairs(buildings) do
 		love.graphics.setColor(255,255,255,255)
 		-- love.graphics.drawq(img, bottom_left, 50, 200)
-		love.graphics.drawq(v.image, v.quad, v.x, v.y)
+		love.graphics.draw(v.image, v.quad, v.x, v.y)
 		-- love.graphics.draw(buildingRedImage, v.x, v.y)
 	end
 
@@ -165,17 +165,23 @@ function love.draw()
 
 end
 
-function love.keypressed(key,unicode)
+function love.keypressed(key)
 	--Only send numbers or enter key
-	if (unicode >= 48 and unicode <= 57)
-						or key == 'return'
-						or key == 'backspace'
-						or key == 'left'
-						or key == 'right' then
-		currentPlayer:keypressed(key, unicode)
-	elseif key == "escape" then
-		love.event.push("quit")
+	print(key, unicode)
+	if key == 'escape' then
+		love.event.push('quit')
+	else
+		currentPlayer:keypressed(key)
 	end
+	-- if (unicode >= 48 and unicode <= 57)
+	-- 					or key == 'return'
+	-- 					or key == 'backspace'
+	-- 					or key == 'left'
+	-- 					or key == 'right' then
+	-- 	currentPlayer:keypressed(key, unicode)
+	-- elseif key == "escape" then
+	-- 	love.event.push("quit")
+	-- end
 end
 
 ---

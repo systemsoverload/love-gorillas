@@ -65,11 +65,11 @@ function Gorilla:draw()
 
 end
 
-function Gorilla:keypressed(key,unicode)
+function Gorilla:keypressed(key)
 	if self.isThrowing == 0 and self.inputState == "angle" and key == "return" then
 		self.inputState = "velocity"
 		self.angle = tonumber(self.playerInput.text) or 0
-		self.playerInput:keypressed(key,unicode)
+		self.playerInput:keypressed(key, nil)
 		self.playerInput.text = ''
 		self.playerInput.y = self.inputsY + 40
 	elseif self.isThrowing and self.inputState == "velocity" and key == "return" then
@@ -79,7 +79,7 @@ function Gorilla:keypressed(key,unicode)
 		self.playerInput.y = self.inputsY + 20
 		self:fireBanana()
 	else
-		self.playerInput:keypressed(key,unicode)
+		self.playerInput:keypressed(key, nil)
 	end
 end
 

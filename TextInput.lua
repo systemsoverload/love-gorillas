@@ -37,6 +37,10 @@ function TextInput:step(k)
 end
 
 function TextInput:keypressed(key, unicode)
+	if not unicode then
+		unicode = 0
+	end
+
 	if key == "backspace" and self.cursor_pos > 0 then
 		self.text = string.sub(self.text, 1, self.cursor_pos-1) .. string.sub(self.text, self.cursor_pos+1)
 		self.cursor_pos = self.cursor_pos-1
@@ -51,7 +55,7 @@ function TextInput:keypressed(key, unicode)
 		if self.callback then
 			self.callback(self.text)
 		end
-	elseif self.text:len() < self.size and unicode < 166 and unicode > 31 then
+	elseif self.text:len() < self.size then -- and unicode < 166 and unicode > 31 then
 		local thekey = key
 		if thekey == 'backspace' then
 			return
