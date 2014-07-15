@@ -9,7 +9,7 @@ function Banana:initialize(x, y, width, height, thrownBy )
 	self.bb.entityType = 'banana'
 	self.bb.inExplosion = false
 	self.entityType = 'banana'
-	self.animation = anim8.newAnimation('loop', bananaGrid('1-4,1'), 0.15)
+	self.animation = anim8.newAnimation(bananaGrid('1-4', 1), 0.15)
 	self.image = bananaImage
 	self.soundPlayed = false
 end
