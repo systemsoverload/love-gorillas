@@ -1,10 +1,12 @@
-QBasic Gorillas Clone Re-Implemented With Love2D
+#Love-Gorillas
 
-TODO -
-	* Menu screen for setting name for each player and gravity
-	* Randomize building textures better
+###QBasic Gorillas Clone Re-Implemented With Love2D
 
-KNOWN BUGS -
-	* Explosions happening after banana exiting an explosion aren't colliding exactly where we want
-	* Sometimes explosions are hanging around after generating a new level
-	* Sometimes player will get multiple turns in a row?
+###TODO -
+* Menu screen for setting name for each player and gravity
+* Randomize building textures better
+
+###KNOWN BUGS -
+* Explosions happening after banana exiting an explosion aren't colliding exactly where we want
+* Sometimes explosions are hanging around after generating a new level
+* Sometimes player will get multiple turns in a row?
