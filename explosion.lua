@@ -13,6 +13,7 @@ function Explosion:initialize(x,y,r)
 	self.x = x
 	self.y = y
 	self.radius = r
+	self.anim_draw = true
 
 	if r > 10 then
 		self.image = explosionImageLarge
@@ -25,14 +26,19 @@ function Explosion:initialize(x,y,r)
 	end
 
 	local explosionGrid = anim8.newGrid(self.frameSize, self.frameSize, self.image:getWidth(), self.image:getHeight())
-	self.animation = anim8.newAnimation('once', explosionGrid('1-6,1'), 0.035)
+	self.animation = anim8.newAnimation(explosionGrid('1-6',1), 0.035)
+	self.animation.onLoop = function(anim, loops)
+		self.anim_draw = false
+	end
 end
 
 function Explosion:draw()
 	love.graphics.setColor(0,0,255,255)
 	love.graphics.circle('fill', self.x, self.y, self.radius, 30)
 	love.graphics.setColor(255,255,255,255)
-	self.animation:draw( self.image, self.x - 10 , self.y - 10 )
+	if self.anim_draw then
+		self.animation:draw( self.image, self.x - 10 , self.y - 10 )
+	end
 end
 
 
